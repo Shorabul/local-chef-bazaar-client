@@ -4,35 +4,14 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { LuMail, LuLock, LuChevronRight } from "react-icons/lu";
 import { motion as Motion } from "framer-motion";
-import useAxiosSecure from '../../../hooks/useAxiosSecure';
-
-// Reusable animated input wrapper
-const AnimatedInput = ({ icon: Icon, error, touched, children }) => (
-    <Motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="relative"
-    >
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Icon
-                className={`w-5 h-5 ${error ? "text-red-500"
-                    : touched ? "text-teal-500"
-                        : "text-gray-400"
-                    }`}
-            />
-        </div>
-
-        {children}
-    </Motion.div>
-);
+import AnimatedInput from '../AnimatedInput';
+import Swal from 'sweetalert2';
 
 const Login = () => {
     const { logInUser, user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const axiosSecure = useAxiosSecure();
 
     const { register, handleSubmit, formState: { errors, touchedFields }, setError } = useForm({ mode: "onChange" });
 
@@ -49,34 +28,39 @@ const Login = () => {
             "auth/user-not-found": "No account found with this email.",
             "auth/wrong-password": "Incorrect password.",
             "auth/too-many-requests": "Too many login attempts. Please try again later.",
+            "auth/invalid-credential": "Email or password is incorrect.",
+            "auth/invalid-credentials": "Email or password is incorrect.",
         };
         return map[error.code] || error.message || "An unexpected error occurred.";
     };
+
 
     // login handler
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            // Log in user
-            const loggedInUser = await logInUser(data.email, data.password);
 
-            // Get the email reliably
-            const email = loggedInUser.user?.email || data.email;
+            await logInUser(data.email, data.password);
 
-            // Update user status to "active" in backend
-            await axiosSecure.patch(`/users/${email}`, { status: "active" });
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "You have successfully logged in",
+                showConfirmButton: false,
+                timer: 1500
+            });
 
             // Navigate after successful login
             navigate(location?.state || '/');
         } catch (error) {
             const errMsg = getFirebaseLoginErrorMessage(error);
 
-            if (error.code?.includes("email")) {
+            if (error.code?.includes("email") || error.code?.includes('credential')) {
                 setError("email", { type: "firebase", message: errMsg });
-            } else if (error.code === "auth/wrong-password") {
+            } else if (error.code === "auth/wrong-password" || error.code?.includes('credential')) {
                 setError("password", { type: "firebase", message: errMsg });
             } else {
-                console.log(errMsg);
+                console.log(error);
             }
         } finally {
             setLoading(false);

@@ -5,28 +5,10 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { LuUserRound, LuMail, LuLock, LuUpload, LuChevronRight, } from "react-icons/lu";
+import { IoLocationOutline } from "react-icons/io5";
 import { motion as Motion } from "framer-motion";
-
-// Reusable animated input wrapper
-const AnimatedInput = ({ icon: Icon, error, touched, children }) => (
-    <Motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="relative"
-    >
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Icon
-                className={`w-5 h-5 ${error ? "text-red-500"
-                    : touched ? "text-teal-500"
-                        : "text-gray-400"
-                    }`}
-            />
-        </div>
-
-        {children}
-    </Motion.div>
-);
+import AnimatedInput from '../AnimatedInput';
+import Swal from 'sweetalert2';
 
 
 const Register = () => {
@@ -37,7 +19,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
 
     const { register, handleSubmit, formState: { errors, touchedFields }, watch, setError } = useForm({ mode: "onChange" });
-    watch("photo");
+    const password = watch("password");
 
     // Redirect if logged in
     useEffect(() => {
@@ -58,7 +40,7 @@ const Register = () => {
         setLoading(true);
         try {
             // Register user in Firebase
-            const firebaseUser = await registerUser(data.email, data.password);
+            await registerUser(data.email, data.password);
 
             // Upload profile image
             const formData = new FormData();
@@ -69,17 +51,26 @@ const Register = () => {
             );
             const photoURL = imgRes.data.data.url;
 
-            // Save user in backend with status "active"
+            // Save user in backend
             const userInfo = {
                 email: data.email,
                 displayName: data.name,
                 photoURL,
+                address: data.address,
                 status: "active",
             };
             await axiosSecure.post("/users", userInfo);
 
             // Update Firebase profile
             await updateUserProfile({ displayName: data.name, photoURL });
+
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "You have successfully Create an account",
+                showConfirmButton: false,
+                timer: 1500
+            });
 
             // Navigate to home or previous route
             navigate(location?.state || '/');
@@ -90,7 +81,7 @@ const Register = () => {
             } else if (error.code === "auth/weak-password") {
                 setError("password", { type: "firebase", message: errMsg });
             } else {
-                console.log(errMsg);
+                console.log(error);
             }
         } finally {
             setLoading(false);
@@ -151,6 +142,21 @@ const Register = () => {
                 </AnimatedInput>
                 {errors.photo && <p className="text-red-600 text-xs">{errors.photo.message}</p>}
 
+                {/* Address */}
+                <AnimatedInput
+                    icon={IoLocationOutline}
+                    error={errors.address}
+                    touched={touchedFields.address}
+                >
+                    <input
+                        type="text"
+                        placeholder="Address"
+                        {...register("address", { required: "Address is required" })}
+                        className="w-full pl-10 py-3 rounded-lg border border-gray-300"
+                    />
+                </AnimatedInput>
+                {errors.address && <p className="text-red-600 text-xs">{errors.address.message}</p>}
+
                 {/* Email */}
                 <AnimatedInput
                     icon={LuMail}
@@ -190,6 +196,26 @@ const Register = () => {
                     />
                 </AnimatedInput>
                 {errors.password && <p className="text-red-600 text-xs">{errors.password.message}</p>}
+
+                {/* Confirm Password */}
+                <AnimatedInput
+                    icon={LuLock}
+                    error={errors.confirmPassword}
+                    touched={touchedFields.confirmPassword}
+                >
+                    <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        {...register("confirmPassword", {
+                            required: "Confirm Password is required",
+                            validate: (value) =>
+                                value === password || "Passwords do not match"
+                        })}
+                        className="w-full pl-10 py-3 rounded-lg border border-gray-300"
+                    />
+                </AnimatedInput>
+                {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message}</p>}
+
 
                 {/* Submit */}
                 <Motion.button

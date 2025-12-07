@@ -6,56 +6,18 @@ import Container from '../../../components/Shared/Container';
 import { IoMenuSharp, IoClose } from "react-icons/io5";
 import useAuth from '../../../hooks/useAuth';
 import Swal from 'sweetalert2'
-import useAxiosSecure from '../../../hooks/useAxiosSecure';
 
 const Navbar = () => {
     const { user, logOut } = useAuth();
     const [menutoggle, setMenuToggle] = useState(false);
     const [profileToggle, setProfileToggle] = useState(false);
-    const axiosSecure = useAxiosSecure();
 
     const handleProfileToggle = () => setProfileToggle(!profileToggle);
     const handleMenuToggle = () => setMenuToggle(!menutoggle);
 
-    // const hangleLogOut = async () => {
-    //     await axiosSecure.patch(`/users/`, {
-    //         email: user.email,
-    //         status: "inactive"
-    //     }).then(() => {
-
-    //     })
-    //     logOut();
-    //     Swal.fire({
-    //         position: "top-end",
-    //         icon: "success",
-    //         title: "You have successfully logged out",
-    //         showConfirmButton: false,
-    //         timer: 1500
-    //     });
-    // };
-
-    // const hangleLogOut = async () => {
-    //     await axiosSecure.patch(`/users/${user.email}`, { status: "inactive" });
-    //     logOut();
-    //     Swal.fire({
-    //         position: "top-end",
-    //         icon: "success",
-    //         title: "You have successfully logged out",
-    //         showConfirmButton: false,
-    //         timer: 1500
-    //     });
-    // };
-
     const handleLogOut = async () => {
         try {
-            const email = user?.email;
 
-            if (email) {
-                // Update user status to "inactive" in backend
-                await axiosSecure.patch(`/users/${email}`, { status: "inactive" });
-            }
-
-            // Log out from Firebase
             await logOut();
 
             Swal.fire({
@@ -67,7 +29,6 @@ const Navbar = () => {
             });
         } catch (error) {
             console.error("Logout failed:", error);
-            alert("Failed to log out. Try again.");
         }
     };
 
@@ -85,10 +46,10 @@ const Navbar = () => {
 
     const links = (
         <>
-            <NavLink className="px-4 py-3 hover:text-yellow-500 transition">Home</NavLink>
-            <NavLink className="px-4 py-3 hover:text-yellow-500 transition">Meals</NavLink>
-            <NavLink className="px-4 py-3 hover:text-yellow-500 transition">Dashboard</NavLink>
-        </>
+            <NavLink to='/' className="px-4 py-3 hover:text-yellow-500 transition">Home</NavLink>
+            <NavLink to='/meals' className="px-4 py-3 hover:text-yellow-500 transition">Meals</NavLink>
+            {user && <NavLink to='/dashboard' className="px-4 py-3 hover:text-yellow-500 transition">Dashboard</NavLink>
+            }        </>
     );
 
     return (
