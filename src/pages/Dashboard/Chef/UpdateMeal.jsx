@@ -11,7 +11,10 @@ const UpdateMeal = () => {
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
 
-    const { register, handleSubmit, reset, setValue } = useForm();
+    const { register,
+        handleSubmit,
+        // reset,
+        setValue } = useForm();
 
     const [loading, setLoading] = useState(true);
     const [mealData, setMealData] = useState(null);
