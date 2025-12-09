@@ -16,40 +16,42 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import Profile from "../pages/Dashboard/Profile";
 import PrivateRoute from "./PrivateRoute";
 import UpdateMeal from "../pages/Dashboard/Chef/UpdateMeal";
+import Meals from "../pages/Meals/Meals";
 
 export const router = createBrowserRouter([
     {
         path: '/',
         element: <RootLayout />,
         children: [
-            { index: true, element: <Home /> }
+            { index: true, element: <Home /> },
+            { path: '/meals', element: <Meals /> }
         ]
     },
     { path: '/login', element: <Login />, },
     { path: '/register', element: <Register />, },
     {
-        path: "/dashboard",
+        path: '/dashboard',
         element: (<PrivateRoute>
             <DashboardLayout />
         </PrivateRoute>),
         children: [
-            { path: "profile", element: <Profile /> },
+            { path: 'profile', element: <Profile /> },
 
             //user Routes
-            { path: "orders", element: <MyOrders /> },
-            { path: "review", element: <MyReview /> },
-            { path: "favorites", element: <FavoriteMeals /> },
+            { path: 'orders', element: <MyOrders /> },
+            { path: 'review', element: <MyReview /> },
+            { path: 'favorites', element: <FavoriteMeals /> },
 
             // Chef Routes
-            { path: "create-meal", element: <CreateMeal /> },
-            { path: "my-meals", element: <MyMeals /> },
-            { path: "order-requests", element: <OrderRequests /> },
-            { path: "meal-update/:id", element: <UpdateMeal /> },
+            { path: 'create-meal', element: <CreateMeal /> },
+            { path: 'my-meals', element: <MyMeals /> },
+            { path: 'order-requests', element: <OrderRequests /> },
+            { path: 'meal-update/:id', element: <UpdateMeal /> },
 
             // Admin Routes
-            { path: "manage-users", element: <ManageUsers /> },
-            { path: "manage-requests", element: <ManageRequests /> },
-            { path: "statistics", element: <PlatformStatistics /> },
+            { path: 'manage-users', element: <ManageUsers /> },
+            { path: 'manage-requests', element: <ManageRequests /> },
+            { path: 'statistics', element: <PlatformStatistics /> },
         ]
     }
 
