@@ -49,15 +49,19 @@ const AuthProvider = ({ children }) => {
                 try {
                     setRoleLoading(true);
 
-                    const res = await axiosSecure.get(`/users/${currentUser.email}/role`);
-                    setRole(res.data?.role || "user");
+                    const res = await axiosSecure.get(`/users/${currentUser.email}`);
+                    setRole(res.data?.role || 'user');
+
+                    // Now you can get chefId
+                    setUser(prev => ({ ...prev, chefId: res.data?.chefId }));
                 } catch (error) {
-                    setRole("user");
+                    setRole('user');
                     console.log(error);
                 } finally {
                     setRoleLoading(false);
                 }
-            } else {
+            }
+            else {
                 setRole(null);
                 setRoleLoading(false);
             }

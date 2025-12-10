@@ -19,7 +19,7 @@ import Container from "../components/Shared/Container";
 export default function DashboardLayout() {
     const { role } = useAuth();
     const [open, setOpen] = useState(false);
-
+    console.log()
     const menuItems = {
         user: [
             { to: "/dashboard/profile", label: "Profile", icon: User },

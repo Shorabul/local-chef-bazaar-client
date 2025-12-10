@@ -19,6 +19,8 @@ import UpdateMeal from "../pages/Dashboard/Chef/UpdateMeal";
 import Meals from "../pages/Meals/Meals";
 import MealDetails from "../pages/MealDetails/MealDetails";
 import OrderConfirm from "../pages/OrderConfirm/OrderConfirm";
+import PaymentSuccess from "../pages/Dashboard/User/PaymentSuccess";
+import PaymentCancelled from "../pages/Dashboard/User/PaymentCancelled";
 
 export const router = createBrowserRouter([
     {
@@ -45,6 +47,8 @@ export const router = createBrowserRouter([
             { path: 'orders', element: <MyOrders /> },
             { path: 'review', element: <MyReview /> },
             { path: 'favorites', element: <FavoriteMeals /> },
+            { path: 'payment-success', element: <PaymentSuccess /> },
+            { path: 'payment-cancelled', element: <PaymentCancelled /> },
 
             // Chef Routes
             { path: 'create-meal', element: <CreateMeal /> },

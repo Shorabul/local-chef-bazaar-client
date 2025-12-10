@@ -1,6 +1,5 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router';
 import Swal from 'sweetalert2';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
@@ -8,7 +7,6 @@ import useAxiosSecure from '../../../hooks/useAxiosSecure';
 const MyOrders = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const navigate = useNavigate();
 
     // Fetch user's orders
     const { data: orders = [], refetch } = useQuery({
@@ -35,12 +33,20 @@ const MyOrders = () => {
         });
 
         if (result.isConfirmed) {
-            // Redirect to Stripe Payment Page
-            navigate(`/stripe-payment/${order._id}`);
-            Swal.fire("Payment successful!", "", "success");
-            refetch();
+            const orderInfo = {
+                totalPrice,
+                mealName: order.mealName,
+                customerEmail: user.email,
+                orderId: order._id,
+            };
+
+            const res = await axiosSecure.post('/orders/payment-checkout-session', orderInfo);
+
+            // redirect to Stripe
+            window.location.assign(res.data.url);
         }
     };
+
 
     return (
         <div className="overflow-x-auto w-full p-4 text-neutral-700">
@@ -76,14 +82,13 @@ const MyOrders = () => {
                                     onClick={() => handlePay(order)}
                                     disabled={!(order.orderStatus === 'accepted' && order.paymentStatus === 'Pending')}
                                     className={`py-1 px-3 rounded font-semibold ${order.orderStatus === 'accepted' && order.paymentStatus === 'Pending'
-                                            ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
-                                            : 'bg-gray-400 text-gray-700 cursor-not-allowed'
+                                        ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
+                                        : 'bg-gray-400 text-gray-700 cursor-not-allowed'
                                         }`}
                                 >
                                     Pay
                                 </button>
                             </td>
-
                         </tr>
                     ))}
                 </tbody>
