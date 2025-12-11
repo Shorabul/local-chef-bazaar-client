@@ -16,8 +16,6 @@ const OrderRequests = () => {
         },
     });
 
-    console.log(orders);
-
     const handleStatusUpdate = async (orderId, newStatus) => {
         try {
             await axiosSecure.patch(`/orders/status/${orderId}`, { orderStatus: newStatus });

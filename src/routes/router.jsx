@@ -41,6 +41,7 @@ export const router = createBrowserRouter([
             <DashboardLayout />
         </PrivateRoute>),
         children: [
+            { index: true, Component: Profile },
             { path: 'profile', element: <Profile /> },
 
             //user Routes

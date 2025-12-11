@@ -41,7 +41,7 @@ const Banner = () => {
 
     return (
         <Container>
-            <div className="relative w-full h-72 md:h-96 overflow-hidden rounded-xl">
+            <div className="relative w-full h-64 md:h-96 lg:h-[700px] overflow-hidden rounded-xl">
                 <AnimatePresence>
                     <Motion.img
                         key={index}
@@ -56,7 +56,7 @@ const Banner = () => {
                 </AnimatePresence>
 
                 {/* Text Overlay */}
-                <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-white text-center px-4">
+                <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-gray-100 text-center px-4">
                     <h2 className="text-2xl md:text-4xl font-bold drop-shadow-lg">
                         {current.foodName}
                     </h2>

@@ -9,10 +9,9 @@ const ManageUsers = () => {
         queryKey: ['users'],
         queryFn: async () => {
             const res = await axiosSecure.get('/users');
-            return res.data;
+            return res.data.data;
         }
     });
-    // console.log(users);
 
     const handleFraud = async (email) => {
         try {

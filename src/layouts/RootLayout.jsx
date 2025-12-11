@@ -22,7 +22,7 @@ const RootLayout = () => {
     const showLoader = navigation.state === "loading" || delayedLoader;
 
     return (
-        <div className='flex flex-col h-full'>
+        <div className='flex flex-col min-h-screen'>
             {showLoader && <PageLoader />}
             <Navbar />
             <div className='flex-1 mt-30'>

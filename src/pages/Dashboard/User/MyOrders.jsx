@@ -9,7 +9,7 @@ const MyOrders = () => {
     const axiosSecure = useAxiosSecure();
 
     // Fetch user's orders
-    const { data: orders = [], refetch } = useQuery({
+    const { data: orders = [], } = useQuery({
         queryKey: ['orders', user.email],
         queryFn: async () => {
             const res = await axiosSecure.get(`/orders/user/${user.email}`);

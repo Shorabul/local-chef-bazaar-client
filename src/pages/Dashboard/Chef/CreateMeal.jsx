@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { motion as Motion } from "motion/react";
+import { motion as Motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { AiOutlineUpload, AiOutlineMail } from "react-icons/ai";
 import useAuth from "../../../hooks/useAuth";
@@ -64,8 +64,8 @@ const CreateMeal = () => {
                 foodImage: photoURL,
                 ingredients: ingredientsArray,
                 price: data.price,
-                estimatedDeliveryTime: data.
-                    estimatedDeliveryTime,
+                deliveryTime: data.
+                    deliveryTime,
                 chefExperience: data.chefExperience,
             }
 
@@ -201,7 +201,7 @@ const CreateMeal = () => {
                     <span>Estimated Delivery Time</span>
                     <input
                         type="text"
-                        {...register("estimatedDeliveryTime", { required: true })}
+                        {...register("deliveryTime", { required: true })}
                         className="w-full pl-2 py-3 border rounded-lg 
                         bg-neutral-50 dark:bg-neutral-700 
                         border-gray-300 dark:border-gray-500"

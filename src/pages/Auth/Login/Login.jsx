@@ -6,9 +6,11 @@ import { LuMail, LuLock, LuChevronRight } from "react-icons/lu";
 import { motion as Motion } from "framer-motion";
 import AnimatedInput from '../AnimatedInput';
 import Swal from 'sweetalert2';
+import useAxiosSecure from '../../../hooks/useAxiosSecure';
 
 const Login = () => {
     const { logInUser, user } = useAuth();
+    const axiosSecure = useAxiosSecure();
     const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -41,6 +43,9 @@ const Login = () => {
         try {
 
             await logInUser(data.email, data.password);
+
+            await axiosSecure.post("/jwt", { email: data.email });
+
 
             Swal.fire({
                 position: "top-end",

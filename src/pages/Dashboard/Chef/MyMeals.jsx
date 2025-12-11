@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
 import Swal from "sweetalert2";
-import { motion as Motion } from "motion/react";
+import { motion as Motion } from "framer-motion";
 import { useQuery, } from "@tanstack/react-query";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { motion as Motion } from "motion/react";
+import { motion as Motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { AiOutlineUpload, AiOutlineMail } from "react-icons/ai";
 import { useParams } from "react-router";

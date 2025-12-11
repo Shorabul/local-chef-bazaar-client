@@ -60,7 +60,7 @@ export default function ThemeToggle() {
         <div ref={ref} className="relative inline-block text-left select-none">
             {/* Button */}
             <button
-                className="px-3 py-1.5 flex items-center gap-2 rounded-xl border text-neutral-700 dark:text-neutral-50 border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-700 hover:bg-gray-200 dark:hover:bg-neutral-800 backdrop-blur-md shadow-sm hover:shadow transition active:scale-95 cursor-pointer"
+                className="px-3 py-1.5 flex items-center gap-2 rounded-xl border border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-600 hover:bg-gray-200 dark:hover:bg-neutral-700 backdrop-blur-md shadow-sm hover:shadow transition active:scale-95 cursor-pointer"
                 onClick={() => setOpen((o) => !o)}
             >
                 <Motion.div
@@ -83,11 +83,11 @@ export default function ThemeToggle() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-44 rounded-xl text-neutral-700 dark:text-neutral-50 bg-neutral-50 dark:bg-neutral-700 backdrop-blur-md shadow-xl overflow-hidden"
+                        className="absolute right-0 mt-2 w-44 rounded-xl bg-neutral-50 dark:bg-neutral-600 backdrop-blur-md shadow-xl overflow-hidden"
                     >
                         {/* Option */}
                         <button
-                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-800 transition cursor-pointer"
+                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-700 transition cursor-pointer"
                             onClick={() => {
                                 setMode("system");
                                 setOpen(false);
@@ -98,7 +98,7 @@ export default function ThemeToggle() {
                         </button>
 
                         <button
-                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-800 transition cursor-pointer"
+                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-700 transition cursor-pointer"
                             onClick={() => {
                                 setMode("light");
                                 setOpen(false);
@@ -109,7 +109,7 @@ export default function ThemeToggle() {
                         </button>
 
                         <button
-                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-800 transition cursor-pointer"
+                            className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-neutral-700 transition cursor-pointer"
                             onClick={() => {
                                 setMode("dark");
                                 setOpen(false);

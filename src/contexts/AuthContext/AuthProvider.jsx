@@ -30,10 +30,16 @@ const AuthProvider = ({ children }) => {
         return signInWithPopup(auth, googleProvider);
     };
 
-    const logOut = () => {
+    // const logOut = () => {
+    //     setLoading(true);
+    //     return signOut(auth);
+    // };
+    const logOut = async () => {
         setLoading(true);
+        await axiosSecure.post("/logout"); // clears cookie
         return signOut(auth);
     };
+
 
     const updateUserProfile = (profile) => {
         return updateProfile(auth.currentUser, profile);

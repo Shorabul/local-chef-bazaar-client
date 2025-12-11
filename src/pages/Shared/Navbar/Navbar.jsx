@@ -6,6 +6,7 @@ import Container from '../../../components/Shared/Container';
 import { IoMenuSharp, IoClose } from "react-icons/io5";
 import useAuth from '../../../hooks/useAuth';
 import Swal from 'sweetalert2'
+import ProfileDropdown from '../../../components/ProfileDropdown';
 
 const Navbar = () => {
     const { user, logOut } = useAuth();
@@ -46,135 +47,128 @@ const Navbar = () => {
 
     const links = (
         <>
-            <NavLink to='/'
-                className="px-4 py-3 hover:text-yellow-500 transition">Home</NavLink>
-            <NavLink to='/meals'
-                className="px-4 py-3 hover:text-yellow-500 transition">Meals</NavLink>
-            {
-                user && <NavLink to='/dashboard'
-                    className="px-4 py-3 hover:text-yellow-500 transition">Dashboard</NavLink>
-            }
+            <NavLink
+                to="/"
+                className={({ isActive }) =>
+                    `px-4 py-3 hover:text-yellow-500 transition ${isActive ? 'text-[#ffde59] font-semibold' : ''}`
+                }
+            >
+                Home
+            </NavLink>
+
+            <NavLink
+                to="/meals"
+                className={({ isActive }) =>
+                    `px-4 py-3 hover:text-yellow-500 transition ${isActive ? 'text-[#ffde59] font-semibold' : ''}`
+                }
+            >
+                Meals
+            </NavLink>
+
+            {user && (
+                <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                        `px-4 py-3 hover:text-yellow-500 transition ${isActive ? 'text-[#ffde59] font-semibold' : ''}`
+                    }
+                >
+                    Dashboard
+                </NavLink>
+            )}
         </>
     );
 
+
     return (
         <div className="fixed w-full z-20 backdrop-blur-xl shadow-sm text-neutral-700 dark:text-neutral-50">
-            <div className="py-3">
-                <Container>
-                    <nav className="w-full flex items-center justify-between relative">
 
-                        {/* Logo */}
-                        <Link to="/" className="flex items-center gap-2">
-                            <img
-                                width="45"
-                                height="45"
-                                src="/Local-Chef's-bazaar.png"
-                                alt=""
-                                className="rounded-full shadow-sm"
-                            />
-                            <span className="hidden md:block font-bold text-xl">
-                                Local Chef's Bazaar
-                            </span>
-                        </Link>
+            <Container>
+                <nav className="w-full flex items-center justify-between relative py-3">
 
-                        {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center gap-7 font-medium">
-                            {links}
-                        </div>
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center gap-2">
+                        <img
+                            width="45"
+                            height="45"
+                            src="https://i.ibb.co/WNVv4py3/Loc-Chef.png"
+                            alt="Locchef"
+                            className="rounded-full shadow-sm"
+                        />
+                        <span className="hidden md:block font-bold text-xl">
+                            Locchef
+                        </span>
+                    </Link>
 
-                        {/* Right Section */}
-                        <div className="flex items-center gap-4">
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-7 font-medium">
+                        {links}
+                    </div>
 
-                            {/* Profile */}
-                            {user ? (
-                                <div className="relative">
-                                    <img
-                                        onClick={handleProfileToggle}
-                                        className="h-10 w-10 rounded-full cursor-pointer hover:scale-105 transition hover:ring-2 hover:ring-yellow-400"
-                                        src={user.photoURL}
-                                        alt=""
-                                    />
+                    {/* Right Section */}
+                    <div className="flex items-center gap-4">
 
-                                    {/* Profile Dropdown */}
-                                    <AnimatePresence>
-                                        {profileToggle && (
-                                            <Motion.div
-                                                initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                                                transition={{ duration: 0.15 }}
-                                                className="absolute right-0 top-12 p-2 w-46 rounded-xl text-neutral-700 dark:text-neutral-50 bg-neutral-50 dark:bg-neutral-700 backdrop-blur-md shadow-xl overflow-hidden"
-                                            >
-                                                <h1 className="font-semibold">{user?.displayName}</h1>
-                                                <p className="text-sm">
-                                                    {user.email}
-                                                </p>
-
-                                                <button
-                                                    onClick={handleLogOut}
-                                                    className="mt-3 w-full py-2 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-500 transition"
-                                                >
-                                                    Logout
-                                                </button>
-                                            </Motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            ) : (
-                                <>
-                                    <NavLink
-                                        to="/login"
-                                        className="bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded-lg font-semibold transition"
-                                    >
-                                        Login
-                                    </NavLink>
-                                    <NavLink
-                                        to="/register"
-                                        className="bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded-lg font-semibold transition"
-                                    >
-                                        Register
-                                    </NavLink>
-                                </>
-                            )}
-
-                            {/* Theme Toggle */}
-                            <ThemeToggle />
-
-                            {/* Mobile Menu Icon */}
-                            <div className="block md:hidden text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
-                                <Motion.div
-                                    key={menutoggle ? "close" : "open"}
-                                    initial={{ rotate: menutoggle ? -90 : 90, opacity: 0 }}
-                                    animate={{ rotate: 0, opacity: 1 }}
-                                    transition={{ duration: 0.2 }}
+                        {/* Profile */}
+                        {user ? (
+                            <ProfileDropdown
+                                handleProfileToggle={handleProfileToggle}
+                                user={user}
+                                profileToggle={profileToggle}
+                                handleLogOut={handleLogOut}
+                            ></ProfileDropdown>
+                        ) : (
+                            <>
+                                <NavLink
+                                    to="/login"
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded-lg font-semibold transition"
                                 >
-                                    {menutoggle ? (
-                                        <IoClose onClick={handleMenuToggle} />
-                                    ) : (
-                                        <IoMenuSharp onClick={handleMenuToggle} />
-                                    )}
-                                </Motion.div>
-                            </div>
-                        </div>
-
-                        {/* Mobile Menu */}
-                        <AnimatePresence>
-                            {menutoggle && (
-                                <Motion.div
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="absolute top-20 left-0 w-full bg-white dark:bg-neutral-900 shadow-lg flex flex-col text-gray-700 dark:text-gray-200 py-5 px-6 space-y-3 md:hidden"
+                                    Login
+                                </NavLink>
+                                <NavLink
+                                    to="/register"
+                                    className="bg-yellow-400 hover:bg-yellow-500 text-black py-2 px-4 rounded-lg font-semibold transition"
                                 >
-                                    {links}
-                                </Motion.div>
-                            )}
-                        </AnimatePresence>
+                                    Register
+                                </NavLink>
+                            </>
+                        )}
 
-                    </nav>
-                </Container>
-            </div>
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
+
+                        {/* Mobile Menu Icon */}
+                        <div className="block md:hidden text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
+                            <Motion.div
+                                key={menutoggle ? "close" : "open"}
+                                initial={{ rotate: menutoggle ? -90 : 90, opacity: 0 }}
+                                animate={{ rotate: 0, opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {menutoggle ? (
+                                    <IoClose onClick={handleMenuToggle} />
+                                ) : (
+                                    <IoMenuSharp onClick={handleMenuToggle} />
+                                )}
+                            </Motion.div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <AnimatePresence>
+                        {menutoggle && (
+                            <Motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute top-20 left-0 w-full bg-white dark:bg-neutral-900 shadow-lg flex flex-col text-gray-700 dark:text-gray-200 py-5 px-6 space-y-3 md:hidden"
+                            >
+                                {links}
+                            </Motion.div>
+                        )}
+                    </AnimatePresence>
+
+                </nav>
+            </Container>
         </div>
     );
 };
