@@ -2,23 +2,23 @@ import React, { useState } from "react";
 import { Link, useParams } from "react-router";
 import Swal from "sweetalert2";
 import Container from "../../components/Shared/Container";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import useAuth from "../../hooks/useAuth";
-
-import { motion as Motion } from "framer-motion";
+import { FaStar } from "react-icons/fa6";
 import StarRating from "../StarRating/StarRating";
+import Skeleton from "../../components/Skeleton";
+import { motion as Motion } from "framer-motion";
 
 const MealDetails = () => {
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
-    const queryClient = useQueryClient();
-    const { user } = useAuth();
+    const { user, backendData } = useAuth();
 
     const [newReview, setNewReview] = useState("");
     const [rating, setRating] = useState(0);
 
-
+    // GET: meal details
     const { data: mealData, isLoading } = useQuery({
         queryKey: ["meal", id],
         queryFn: async () => {
@@ -26,10 +26,9 @@ const MealDetails = () => {
             return res.data.data;
         },
     });
-    const meal = mealData;
 
-
-    const { data: reviews = [] } = useQuery({
+    // GET: reviews
+    const { data: reviews = [], refetch } = useQuery({
         queryKey: ["reviews", id],
         queryFn: async () => {
             const res = await axiosSecure.get(`/reviews/${id}`);
@@ -37,66 +36,101 @@ const MealDetails = () => {
         },
     });
 
+    // POST: submit review
+    const handleSubmitReview = async () => {
+        if (!rating) {
+            Swal.fire("Rating Required", "Please select a rating.", "warning");
+            return;
+        }
+        if (!newReview.trim()) {
+            Swal.fire("Empty Review", "Please write something.", "warning");
+            return;
+        }
 
-    const reviewMutation = useMutation({
-        mutationFn: async (reviewData) =>
-            axiosSecure.post("/reviews", reviewData),
-        onSuccess: () => {
+        try {
+            await axiosSecure.post("/reviews", {
+                foodId: id,
+                userName: user.displayName,
+                userEmail: user.email,
+                userImage: user.photoURL,
+                rating,
+                comment: newReview,
+            });
             Swal.fire("Success!", "Review added successfully!", "success");
             setNewReview("");
             setRating(0);
-            queryClient.invalidateQueries(["reviews", id]);
-        },
-        onError: () => {
+            refetch(); // refresh reviews
+        } catch (error) {
+            console.log(error);
             Swal.fire("Error!", "Failed to submit review", "error");
-        },
-    });
-
-    const handleSubmitReview = () => {
-        if (!user)
-            return Swal.fire("Login Required", "Please login to add review.", "warning");
-        if (!rating)
-            return Swal.fire("Rating Required", "Please select a rating.", "warning");
-        if (!newReview.trim())
-            return Swal.fire("Empty Review", "Please write something.", "warning");
-
-        reviewMutation.mutate({
-            foodId: id,
-            reviewerName: user.displayName,
-            reviewerEmail: user.email,
-            reviewerImage: user.photoURL,
-            rating,
-            comment: newReview,
-            date: new Date(),
-        });
+        }
     };
 
-    const favoriteMutation = useMutation({
-        mutationFn: async (favData) => axiosSecure.post("/favorites", favData),
-        onSuccess: (res) => {
-            if (!res.data.success)
-                return Swal.fire("Already Added", "This meal is already a favorite!", "info");
-            Swal.fire("Added!", "Meal added to favorites!", "success");
-        },
-        onError: () => Swal.fire("Error!", "Failed to add favorite.", "error"),
-    });
+    // POST: add favorite
+    const handleFavorite = async () => {
+        if (!user || !mealData) {
+            Swal.fire("Login Required", "Please login to add favorites.", "warning");
+            return;
+        }
 
-    const handleFavorite = () => {
-        if (!user)
-            return Swal.fire("Login Required", "Please login to add favorites.", "warning");
-
-        favoriteMutation.mutate({
-            userEmail: user.email,
-            mealId: meal._id,
-            mealName: meal.foodName,
-            chefId: meal.chefId,
-            chefName: meal.chefName,
-            price: meal.price,
-        });
+        try {
+            const res = await axiosSecure.post("/favorites", {
+                userEmail: user.email,
+                foodId: mealData._id,
+                foodName: mealData.foodName,
+                chefId: mealData.chefId,
+                chefName: mealData.chefName,
+                price: mealData.price,
+            });
+            if (!res.data.success) {
+                Swal.fire("Already Added", "This meal is already a favorite!", "info");
+            } else {
+                Swal.fire("Added!", "Meal added to favorites!", "success");
+            }
+        } catch (error) {
+            console.log(error);
+            Swal.fire("Error!", "Failed to add favorite.", "error");
+        }
     };
 
-    if (isLoading || !meal)
-        return <div className="text-center py-10">Loading...</div>;
+
+    if (isLoading || !mealData) {
+        return (
+            <div className="p-6 space-y-6">
+                {/* Image skeleton */}
+                <Skeleton className="w-full md:w-1/2 h-64 rounded-lg" />
+
+                {/* Text skeletons */}
+                <div className="space-y-3">
+                    <Skeleton className="h-6 w-1/3" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+
+                {/* Button skeletons */}
+                <div className="flex gap-4 mt-4">
+                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-10 w-40" />
+                </div>
+
+                {/* Review section skeleton */}
+                <div className="mt-10 space-y-4">
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                </div>
+            </div>
+        );
+    }
+
 
     return (
         <Container>
@@ -106,8 +140,8 @@ const MealDetails = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4 }}
-                    src={meal?.foodImage}
-                    alt={meal?.foodName}
+                    src={mealData?.foodImage}
+                    alt={mealData?.foodName}
                     className="w-full md:w-1/2 h-full object-cover rounded-lg shadow-lg"
                 />
 
@@ -117,53 +151,62 @@ const MealDetails = () => {
                         animate={{ y: 0, opacity: 1 }}
                         className="text-3xl font-bold mb-3"
                     >
-                        {meal.foodName}
+                        {mealData?.foodName}
                     </Motion.h1>
 
                     <p>
                         <strong className="mr-1 font-semibold">Chef:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.chefName}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefName}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Price:</strong>
-                        <span className="text-gray-500 dark:text-gray-300"> ${meal?.price}</span>
+                        <span className="text-gray-500 dark:text-gray-300"> ${mealData?.price}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Rating:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.rating}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.rating}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Delivery Area:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.deliveryArea}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.deliveryArea}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Delivery Time:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.deliveryTime}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.deliveryTime}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Experience:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.chefExperience}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefExperience}</span>
                     </p>
                     <p>
                         <strong className="mr-1 font-semibold">Chef ID:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{meal?.chefId}</span>
+                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefId}</span>
                     </p>
-                    <p className="flex items-center flex-wrap">
+                    <div className="flex items-center flex-wrap">
                         <strong className="mr-1 font-semibold">Ingredients:</strong>
                         {
-                            meal?.ingredients.map((ing, i) => (
+                            mealData?.ingredients.map((ing, i) => (
                                 <p key={i} className="mr-1 text-gray-500 dark:text-gray-300">{ing},</p>
                             ))
                         }
-                    </p>
+                    </div>
 
                     <div className="flex gap-4 mt-4">
-                        <Link
-                            to={`/order-confirm/${meal._id}`}
-                            className="bg-[#ffde59] px-4 py-2 rounded-lg text-black font-semibold hover:bg-yellow-400"
-                        >
-                            Order Now
-                        </Link>
+                        {backendData.status === 'fraud' ? (
+                            <button
+                                disabled
+                                className="bg-gray-300 px-4 py-2 rounded-lg text-black font-semibold cursor-not-allowed"
+                            >
+                                Order Now
+                            </button>
+                        ) : (
+                            <Link
+                                to={`/order-confirm/${mealData._id}`}
+                                className="bg-[#ffde59] px-4 py-2 rounded-lg text-black font-semibold hover:bg-yellow-400"
+                            >
+                                Order Now
+                            </Link>
+                        )}
 
                         <button
                             onClick={handleFavorite}
@@ -210,12 +253,12 @@ const MealDetails = () => {
                         <div className="flex flex-col items-start">
                             <div className="flex items-center gap-2">
                                 <div>
-                                    <img src={rev.reviewerImage} className="w-10 h-10 rounded-full" />
+                                    <img src={rev.userImage} className="w-10 h-10 rounded-full" />
                                 </div>
                                 <div>
                                     <p className="font-bold">{rev.reviewerName}</p>
                                     <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
-                                        {new Date(rev.date).toLocaleString()}
+                                        {new Date(rev.createdAt).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
@@ -223,7 +266,10 @@ const MealDetails = () => {
                                 <p className="mt-2">{rev.comment}</p>
                                 <div className="flex items-center gap-1">
                                     {Array.from({ length: rev.rating }).map((_, i) => (
-                                        <p key={i} className="text-yellow-400">★</p>
+                                        <span
+                                            key={i} className="text-yellow-400">
+                                            <FaStar />
+                                        </span>
                                     ))}
                                     <span>{rev.rating}</span>
                                 </div>

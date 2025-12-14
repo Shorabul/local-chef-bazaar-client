@@ -2,26 +2,26 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { motion as Motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { AiOutlineUpload, AiOutlineMail } from "react-icons/ai";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import axios from "axios";
-
+import { LayoutDashboard } from "lucide-react";
+import Skeleton from "../../../components/Skeleton";
 
 const CreateMeal = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { register, handleSubmit, setValue } = useForm();
 
-    const { register, handleSubmit, reset, setValue } = useForm();
+    const isDark = document.documentElement.classList.contains("dark");
 
     const fetchUserData = async () => {
         try {
             const res = await axiosSecure.get(`/users/${user.email}`);
             setUserData(res.data);
 
-            // Set form default values
             setValue("chefName", res.data?.displayName || "");
             setValue("chefEmail", res.data?.email || "");
         } catch (err) {
@@ -30,205 +30,280 @@ const CreateMeal = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         if (user?.email) {
             fetchUserData();
         }
     }, [user]);
 
-
-
-
     const onSubmit = async (data) => {
         try {
-            // Convert ingredients from comma-separated text → array
             const ingredientsArray = data.ingredients
                 .split(",")
-                .map(item => item.trim())
+                .map((item) => item.trim())
                 .filter(Boolean);
 
-            // Upload food image
+            // Upload image
             const formData = new FormData();
             formData.append("image", data.foodImage[0]);
+
             const imgRes = await axios.post(
                 `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host_key}`,
                 formData
             );
-            const photoURL = imgRes.data.data.url;
 
             const mealInfo = {
                 chefId: userData.chefId,
                 chefName: data.chefName,
                 chefEmail: data.chefEmail,
+                foodImage: imgRes.data.data.url,
                 foodName: data.foodName,
-                foodImage: photoURL,
                 ingredients: ingredientsArray,
                 price: data.price,
-                deliveryTime: data.
-                    deliveryTime,
+                deliveryTime: `${data.deliveryTime} minutes`,
+                deliveryArea: data.deliveryArea,
+                deliveryRadius: data.deliveryRadius,
                 chefExperience: data.chefExperience,
-            }
-
-
+                rating: "0",
+            };
 
             const res = await axiosSecure.post("/meals", mealInfo);
 
-            console.log(res);
-
             if (res.data.data.insertedId) {
                 Swal.fire({
+                    title: "Success",
+                    text: `${data.foodName} has been created successfully.`,
                     icon: "success",
-                    title: "Meal Created!",
-                    text: `${data.foodName} has been added successfully.`,
-                    confirmButtonColor: "#ffcc00",
+                    timer: 2000,
+                    showConfirmButton: false,
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
                 });
 
-                reset();
-
             }
-
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                title: "Error",
+                text: "Failed to create the meal",
+                icon: "error",
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
+                iconColor: "#fb2c36",
+                confirmButtonColor: "#fb2c36",
+            });
         }
     };
 
+    /* Skeleton Loader */
+    if (loading) {
+        return (
+            <div className="min-h-screen flex justify-center w-full p-6">
+                <div className="w-full max-w-4xl space-y-6">
+                    {/* Header */}
+                    <div className="text-center space-y-2">
+                        <Skeleton className="h-8 w-40 mx-auto" />
+                        <Skeleton className="h-4 w-32 mx-auto" />
+                    </div>
 
-    if (loading) return <div className="text-center py-10">Loading...</div>;
+                    {/* General Info */}
+                    <div className="border rounded-xl p-4 bg-neutral-100 dark:bg-neutral-700 space-y-4">
+                        <Skeleton className="h-6 w-48" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full md:col-span-2" />
+                        </div>
+                    </div>
+
+                    {/* Pricing */}
+                    <div className="border rounded-xl p-4 bg-neutral-100 dark:bg-neutral-700 space-y-4">
+                        <Skeleton className="h-6 w-48" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    </div>
+
+                    {/* Meal Details */}
+                    <div className="border rounded-xl p-4 bg-neutral-100 dark:bg-neutral-700 space-y-4">
+                        <Skeleton className="h-6 w-48" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    </div>
+
+                    {/* Media Upload */}
+                    <div className="border rounded-xl p-4 bg-neutral-100 dark:bg-neutral-700 space-y-4">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Skeleton className="h-12 w-full rounded-lg" />
+                </div>
+            </div>
+        );
+    }
+
+    // Fraud check
+    if (userData?.status === "fraud") {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center">
+                <div className="text-center p-6 bg-red-100 border border-red-300 rounded-lg">
+                    <h1 className="text-2xl font-bold text-red-600 mb-2">Access Denied</h1>
+                    <p className="text-gray-700">
+                        You have been marked as <span className="font-semibold">fraud</span>.
+                        Chefs with fraud status cannot create meals.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    /* Animations */
+    const cardVariant = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+    };
+
+    const containerVariant = {
+        hidden: {},
+        visible: {
+            transition: {
+                staggerChildren: 0.08,
+            },
+        },
+    };
 
     return (
         <Motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="min-h-screen p-6 flex justify-center items-start w-full 
-            text-neutral-700 dark:text-neutral-50"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariant}
+            className="min-h-screen flex justify-center w-full"
         >
             <Motion.form
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.4 }}
                 onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-lg p-6 rounded-2xl shadow-md"
+                className="w-full max-w-4xl space-y-6"
             >
-                <h2 className="text-2xl font-bold mb-4">Create Meal</h2>
+                {/* Header */}
+                <Motion.div variants={cardVariant} className="text-center">
+                    <h1 className="font-bold text-2xl">Create Meal</h1>
+                    <p className="flex justify-center gap-2 text-sm opacity-80">
+                        <LayoutDashboard size={16} /> Dashboard / Create Meal
+                    </p>
+                </Motion.div>
 
-                <span className="font-semibold">Chef ID: {userData?.chefId}</span>
-
-                <div className="lg:flex gap-2 mt-3">
-                    {/* Chef Name */}
-                    <div className="w-full mb-3">
-                        <label className="block mb-1">Chef Name</label>
+                {/* General Info */}
+                <Motion.div
+                    variants={cardVariant}
+                    className="border rounded-xl p-4 shadow-sm bg-neutral-50 dark:bg-neutral-700"
+                >
+                    <h3 className="text-lg font-semibold mb-4">General Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
                             type="text"
                             {...register("chefName")}
                             readOnly
-                            className="w-full pl-2 py-3 border rounded-lg 
-                            bg-neutral-50 dark:bg-neutral-700 
-                            border-gray-300 dark:border-gray-500"
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
                         />
-                    </div>
-
-                    {/* Email */}
-                    <div className="w-full mb-3">
-                        <label className="block mb-1 flex items-center gap-2">
-                            <AiOutlineMail /> Chef Email
-                        </label>
                         <input
                             type="email"
                             {...register("chefEmail")}
                             readOnly
-                            className="w-full pl-2 py-3 border rounded-lg 
-                            bg-neutral-50 dark:bg-neutral-700 
-                            border-gray-300 dark:border-gray-500"
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Food Name"
+                            {...register("foodName", { required: true })}
+                            className="md:col-span-2 px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
                         />
                     </div>
-                </div>
+                </Motion.div>
 
-                {/* Food Name */}
-                <label className="block mb-3">
-                    <span>Food Name</span>
-                    <input
-                        type="text"
-                        {...register("foodName", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </label>
+                {/* Pricing */}
+                <Motion.div
+                    variants={cardVariant}
+                    className="border rounded-xl p-4 shadow-sm bg-neutral-50 dark:bg-neutral-700"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Pricing</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input
+                            type="number"
+                            placeholder="Price"
+                            {...register("price", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Delivery Time (minutes)"
+                            {...register("deliveryTime", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                    </div>
+                </Motion.div>
 
-                {/* Food Image */}
-                <label className="block mb-3">
-                    <span className="flex items-center gap-2">
-                        <AiOutlineUpload /> Food Image
-                    </span>
+                {/* Meal Details */}
+                <Motion.div
+                    variants={cardVariant}
+                    className="border rounded-xl p-4 shadow-sm bg-neutral-50 dark:bg-neutral-700"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Meal Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input
+                            type="text"
+                            placeholder="Ingredients (comma-separated)"
+                            {...register("ingredients", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Chef Experience"
+                            {...register("chefExperience", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Delivery Area"
+                            {...register("deliveryArea", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                        <input
+                            type="number"
+                            step="0.1"
+                            placeholder="Delivery Radius (km)"
+                            {...register("deliveryRadius", { required: true })}
+                            className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
+                        />
+                    </div>
+                </Motion.div>
+
+                {/* Media Upload */}
+                <Motion.div
+                    variants={cardVariant}
+                    className="border rounded-xl p-4 shadow-sm bg-neutral-50 dark:bg-neutral-700"
+                >
+                    <h3 className="text-lg font-semibold mb-4">Product Media</h3>
                     <input
                         type="file"
                         accept="image/*"
                         {...register("foodImage", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
+                        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"
                     />
-                </label>
+                </Motion.div>
 
-                {/* Price */}
-                <label className="block mb-3">
-                    <span>Price ($)</span>
-                    <input
-                        type="number"
-                        step="0.01"
-                        {...register("price", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </label>
-
-                {/* Ingredients */}
-                <label className="block mb-3">
-                    <span>Ingredients (comma-separated)</span>
-                    <input
-                        type="text"
-                        {...register("ingredients", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </label>
-
-                {/* Delivery Time */}
-                <label className="block mb-3">
-                    <span>Estimated Delivery Time</span>
-                    <input
-                        type="text"
-                        {...register("deliveryTime", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </label>
-
-                {/* Experience */}
-                <label className="block mb-3">
-                    <span>Chef Experience</span>
-                    <input
-                        type="text"
-                        {...register("chefExperience", { required: true })}
-                        className="w-full pl-2 py-3 border rounded-lg 
-                        bg-neutral-50 dark:bg-neutral-700 
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </label>
-
-                {/* Hidden Chef ID */}
-                {/* <input type="hidden" {...register("chefId")} /> */}
-
+                {/* Submit */}
                 <Motion.button
                     whileTap={{ scale: 0.95 }}
+                    variants={cardVariant}
                     type="submit"
-                    className="w-full py-3 rounded-lg bg-yellow-400 
-                    text-black font-semibold mt-2 hover:bg-yellow-500 
-                    transition"
+                    className="w-full py-3 rounded-lg bg-[#ffde59] text-black font-semibold hover:bg-yellow-400 transition"
                 >
                     Create Meal
                 </Motion.button>

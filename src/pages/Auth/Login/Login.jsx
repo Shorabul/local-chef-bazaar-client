@@ -7,6 +7,7 @@ import { motion as Motion } from "framer-motion";
 import AnimatedInput from '../AnimatedInput';
 import Swal from 'sweetalert2';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const { logInUser, user } = useAuth();
@@ -14,6 +15,7 @@ const Login = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [passShow, setPassShow] = useState(false);
 
     const { register, handleSubmit, formState: { errors, touchedFields }, setError } = useForm({ mode: "onChange" });
 
@@ -78,9 +80,7 @@ const Login = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="max-w-sm mx-auto pt-10 space-y-5 
-            text-neutral-700
-            dark:text-neutral-50 h-screen"
+            className="max-w-sm mx-auto pt-10 space-y-5 min-h-screen"
         >
             {/* Header */}
             <Motion.div
@@ -134,7 +134,7 @@ const Login = () => {
                     touched={touchedFields.password}
                 >
                     <input
-                        type="password"
+                        type={passShow ? 'text' : 'password'}
                         placeholder="Password"
                         {...register("password", {
                             required: "Password is required",
@@ -145,6 +145,12 @@ const Login = () => {
                         dark:bg-neutral-700
                         border-gray-300 dark:border-gray-500"
                     />
+                    <span
+                        onClick={() => setPassShow(!passShow)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    >
+                        {passShow ? <Eye /> : <EyeOff />}
+                    </span>
                 </AnimatedInput>
                 {errors.password && <Motion.p
                     initial={{ opacity: 0 }}
@@ -160,7 +166,7 @@ const Login = () => {
                     whileHover={{ scale: 1.02 }}
                     type="submit"
                     disabled={loading}
-                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-yellow-400 text-black hover:bg-yellow-500 font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
+                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] text-black hover:bg-yellow-400 font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
                 >
                     Login
                     <LuChevronRight />

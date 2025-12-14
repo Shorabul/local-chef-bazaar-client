@@ -5,7 +5,7 @@ import { Star, MapPin, Clock } from "lucide-react";
 
 const MealCard = ({ meal }) => {
     const navigate = useNavigate();
-    console.log(meal);
+
     return (
         <Motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -48,7 +48,7 @@ const MealCard = ({ meal }) => {
 
                     <div className="flex items-center gap-1">
                         <span>{meal?.deliveryArea}</span>
-                        <MapPin size={16} /> <span>{meal?.distance || "5 km"}</span>
+                        <MapPin size={16} /> <span>{meal?.deliveryRadius || "5 km"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <Clock size={16} /> <span>{meal?.deliveryTime || "40 min"}</span>

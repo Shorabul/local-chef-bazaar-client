@@ -14,6 +14,7 @@ const OrderConfirm = () => {
     const [meal, setMeal] = useState(null);
     const [loading, setLoading] = useState(true);
 
+
     const {
         register,
         handleSubmit,
@@ -28,6 +29,7 @@ const OrderConfirm = () => {
     });
 
     const quantity = watch("quantity") || 1;
+    const isDark = document.documentElement.classList.contains("dark");
 
     useEffect(() => {
         const fetchMeal = async () => {
@@ -40,13 +42,20 @@ const OrderConfirm = () => {
                 Swal.fire({
                     icon: "error",
                     title: "Failed to load meal",
+                    text: "Something went wrong while fetching the meal.",
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
+                    iconColor: "#fb2c36",
+                    confirmButtonColor: "#fb2c36",
                 });
             } finally {
                 setLoading(false);
             }
         };
+
         fetchMeal();
-    }, [id, axiosSecure, setValue]);
+    }, [id, axiosSecure, setValue, isDark]);
+
 
     const onSubmit = async (data) => {
         if (!meal) return;
@@ -54,34 +63,56 @@ const OrderConfirm = () => {
         const totalPrice = meal.price * data.quantity;
 
         const confirmResult = await Swal.fire({
-            title: `Your total price is $${totalPrice}`,
-            text: "Do you want to confirm the order?",
+            title: "Confirm Order",
+            text: `Your total price is $${totalPrice}. Do you want to place this order?`,
             icon: "question",
+            background: isDark ? "#262626" : "#ffffff",
+            color: isDark ? "#ffffff" : "#262626",
+            iconColor: "#facc15",
             showCancelButton: true,
             confirmButtonText: "Yes, order now!",
             cancelButtonText: "Cancel",
+            confirmButtonColor: "#facc15",
+            cancelButtonColor: "#525252",
         });
 
         if (confirmResult.isConfirmed) {
             const orderData = {
                 foodId: meal._id,
-                mealName: meal.foodName,
+                foodName: meal.foodName,
                 price: meal.price,
                 quantity: data.quantity,
-                chefId: meal.chefId,
                 userEmail: user.email,
                 userAddress: data.userAddress,
+                chefId: meal.chefId,
+                chefName: meal.chefName,
                 orderStatus: "pending",
-                orderTime: new Date().toISOString(),
-                paymentStatus: "Pending",
+                paymentStatus: "pending",
             };
 
             try {
                 await axiosSecure.post("/order", orderData);
-                Swal.fire("Success!", "Order placed successfully!", "success");
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Order Placed!",
+                    text: "Your order has been placed successfully.",
+                    timer: 2000,
+                    showConfirmButton: false,
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
+                });
             } catch (error) {
                 console.error(error);
-                Swal.fire("Error", "Failed to place order", "error");
+                Swal.fire({
+                    title: "Error",
+                    text: "Failed to place order. Please try again.",
+                    icon: "error",
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
+                    iconColor: "#fb2c36",
+                    confirmButtonColor: "#fb2c36",
+                });
             }
         }
     };

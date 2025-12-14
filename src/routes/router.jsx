@@ -21,25 +21,27 @@ import MealDetails from "../pages/MealDetails/MealDetails";
 import OrderConfirm from "../pages/OrderConfirm/OrderConfirm";
 import PaymentSuccess from "../pages/Dashboard/User/PaymentSuccess";
 import PaymentCancelled from "../pages/Dashboard/User/PaymentCancelled";
+import AdminRoute from "./AdminRoute";
+import ChefRoute from "./ChefRoute";
+import AuthGate from "../components/AuthGate";
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <RootLayout />,
+        element: (<AuthGate><RootLayout /></AuthGate>
+        ),
         children: [
             { index: true, element: <Home /> },
             { path: '/meals', element: <Meals /> },
-            { path: '/meals/:id', element: <MealDetails /> },
-            { path: '/order-confirm/:id', element: <OrderConfirm /> },
+            { path: '/meals/:id', element: (<PrivateRoute><MealDetails /></PrivateRoute>) },
+            { path: '/order-confirm/:id', element: (<PrivateRoute><OrderConfirm /> </PrivateRoute>) },
         ]
     },
     { path: '/login', element: <Login />, },
     { path: '/register', element: <Register />, },
     {
         path: '/dashboard',
-        element: (<PrivateRoute>
-            <DashboardLayout />
-        </PrivateRoute>),
+        element: (<PrivateRoute><DashboardLayout /></PrivateRoute>),
         children: [
             { index: true, Component: Profile },
             { path: 'profile', element: <Profile /> },
@@ -52,15 +54,17 @@ export const router = createBrowserRouter([
             { path: 'payment-cancelled', element: <PaymentCancelled /> },
 
             // Chef Routes
-            { path: 'create-meal', element: <CreateMeal /> },
-            { path: 'my-meals', element: <MyMeals /> },
-            { path: 'order-requests', element: <OrderRequests /> },
-            { path: 'meal-update/:id', element: <UpdateMeal /> },
+            { path: 'create-meal', element: (<ChefRoute><CreateMeal /></ChefRoute>) },
+            { path: 'my-meals', element: (<ChefRoute><MyMeals /></ChefRoute>) },
+            { path: 'order-requests', element: (<ChefRoute><OrderRequests /></ChefRoute>) },
+            { path: 'meal-update/:id', element: (<ChefRoute><UpdateMeal /> </ChefRoute>) },
 
             // Admin Routes
-            { path: 'manage-users', element: <ManageUsers /> },
-            { path: 'manage-requests', element: <ManageRequests /> },
-            { path: 'statistics', element: <PlatformStatistics /> },
+            {
+                path: 'manage-users', element: (<AdminRoute><ManageUsers /></AdminRoute>)
+            },
+            { path: 'manage-requests', element: (<AdminRoute><ManageRequests /></AdminRoute>) },
+            { path: 'statistics', element: (<AdminRoute><PlatformStatistics /></AdminRoute>) },
         ]
     }
 

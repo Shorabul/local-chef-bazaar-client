@@ -6,8 +6,9 @@ import useAuth from "../../../hooks/useAuth";
 import StarRating from "../../StarRating/StarRating";
 import { useQuery } from "@tanstack/react-query";
 import EmptyState from "../../../components/EmptyState";
-import Container from "../../../components/Shared/Container";
 import Skeleton from "../../../components/Skeleton";
+import { LayoutDashboard } from "lucide-react";
+import { FaStar } from "react-icons/fa";
 
 const MyReview = () => {
     const axiosSecure = useAxiosSecure();
@@ -32,6 +33,7 @@ const MyReview = () => {
         enabled: !!user?.email, // Only run if user is logged in
     });
 
+    console?.log(reviews)
 
     // Delete review
     const handleDelete = async (id) => {
@@ -39,15 +41,12 @@ const MyReview = () => {
             title: "Are you sure?",
             text: "This review will be permanently deleted!",
             icon: "warning",
-
-            background: isDark ? "#262626" : "#ffffff",
-            color: isDark ? "#ffffff" : "#262626",
-            iconColor: isDark ? "#facc15" : "#facc15",
-
-            showCancelButton: true,
             confirmButtonText: "Yes, delete it!",
             cancelButtonText: "Cancel",
-
+            background: isDark ? "#262626" : "#ffffff",
+            color: isDark ? "#ffffff" : "#262626",
+            iconColor: "#facc15",
+            showCancelButton: true,
             confirmButtonColor: "#fb2c36",
             cancelButtonColor: "#525252",
         });
@@ -66,7 +65,6 @@ const MyReview = () => {
                     showConfirmButton: false,
                 });
                 refetch();
-                // reviews.splice(reviews.findIndex((r) => r._id === id), 1);
             } catch (error) {
                 console.error(error);
                 Swal.fire({
@@ -75,8 +73,8 @@ const MyReview = () => {
                     icon: "error",
                     background: isDark ? "#262626" : "#ffffff",
                     color: isDark ? "#ffffff" : "#262626",
-                    iconColor: isDark ? "#f87171" : "#dc2626",
-                    confirmButtonColor: "#ef4444",
+                    iconColor: "#fb2c36",
+                    confirmButtonColor: "#fb2c36",
                 });
             }
         }
@@ -114,14 +112,27 @@ const MyReview = () => {
             Swal.fire("Error", "Failed to update review", "error");
         }
     };
+    // Animation Variants
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.4,
+                ease: "easeOut",
+                staggerChildren: 0.05,
+            },
+        },
+    };
 
     if (isLoading) {
         return (
-            <div className="p-6 space-y-4">
+            <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                     <div
                         key={i}
-                        className="border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-600 p-4 rounded-lg shadow-sm"
+                        className="border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg shadow-sm"
                     >
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -146,92 +157,110 @@ const MyReview = () => {
         );
     }
 
-    if (!reviews.length) {
-        return <Container><EmptyState message="You have not submitted any reviews yet." /></Container>;
-    }
 
     return (
-        <div className="p-6">
-            {reviews.map((rev) => (
-                <Motion.div
-                    key={rev._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-600 p-4 rounded-lg mb-3 shadow-sm"
-                >
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div>
-                                <img src={rev.reviewerImage} className="w-10 h-10 rounded-full" />
+        <Motion.div
+            className="overflow-x-auto w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible">
+
+            {/* Header */}
+            <Motion.div className="text-center mb-6">
+                <h1 className="font-bold text-2xl">My Reviews</h1>
+                <p className="flex justify-center gap-2 text-sm opacity-80">
+                    <LayoutDashboard size={16} /> Dashboard / My Reviews
+                </p>
+            </Motion.div>
+
+            {/* Empty State */}
+            {!reviews.length ? (
+                <EmptyState message="You have not submitted any reviews yet." />
+            ) : (<>
+
+                {reviews.map((rev) => (
+                    <Motion.div
+                        key={rev._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="border-neutral-200 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg mb-3 shadow-sm"
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div>
+                                    <img src={rev.userImage} className="w-10 h-10 rounded-full" />
+                                </div>
+                                <div>
+                                    <p className="font-bold">{rev.userName}</p>
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+                                        {new Date(rev.createdAt).toLocaleString()}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-bold">{rev.reviewerName}</p>
-                                <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
-                                    {new Date(rev.date).toLocaleString()}
-                                </p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleEdit(rev)}
+                                    className="bg-[#ffde59] text-black px-3 py-2 rounded-lg hover:bg-yellow-400 font-semibold text-xs md:text-sm lg:text-base"
+                                >
+                                    Update
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(rev._id)}
+                                    className="px-3 py-2 rounded-lg text-white bg-red-500 hover:bg-red-600 text-xs md:text-sm lg:text-base font-semibold"
+                                >
+                                    Delete
+                                </button>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => handleEdit(rev)}
-                                className="bg-[#ffde59] text-black px-3 py-1 rounded-lg hover:bg-yellow-400"
-                            >
-                                Update
-                            </button>
-                            <button
-                                onClick={() => handleDelete(rev._id)}
-                                className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
-                            >
-                                Delete
-                            </button>
+                        <div>
+                            <p className="mt-2">{rev.comment}</p>
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: rev.rating }).map((_, i) => (
+                                    <p key={i} className="text-yellow-400">
+                                        <FaStar />
+                                    </p>
+                                ))}
+                                <span>{rev.rating}</span>
+                            </div>
+                        </div>
+                    </Motion.div>
+                ))}
+
+                {/* Modal */}
+                {modalOpen && (
+                    <div className="fixed inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow w-full max-w-md relative">
+                            <h3 className="w-full text-center text-xl font-bold mb-4">Update Review</h3>
+                            <p className="font-semibold mb-2">Rating:</p>
+                            <StarRating rating={editRating} setRating={setEditRating} />
+
+                            <p className="font-semibold mt-4 mb-2">Comment:</p>
+                            <textarea
+                                className="w-full border border-gray-300 dark:border-gray-500 p-3 rounded-lg"
+                                rows={3}
+                                value={editComment}
+                                onChange={(e) => setEditComment(e.target.value)}
+                            />
+
+                            <div className="flex justify-end gap-2 mt-4">
+                                <button
+                                    onClick={() => setModalOpen(false)}
+                                    className="px-3 py-2 rounded-lg bg-neutral-200 dark:bg-neutral-600 hover:bg-gray-400 dark:hover:bg-neutral-700"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdateSubmit}
+                                    className="px-3 py-2 rounded-lg bg-[#ffde59] text-black  hover:bg-yellow-400"
+                                >
+                                    Update
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <p className="mt-2">{rev.comment}</p>
-                        <div className="flex items-center gap-1">
-                            {Array.from({ length: rev.rating }).map((_, i) => (
-                                <p key={i} className="text-yellow-400">★</p>
-                            ))}
-                            <span>{rev.rating}</span>
-                        </div>
-                    </div>
-                </Motion.div>
-            ))}
-
-            {/* Modal */}
-            {modalOpen && (
-                <div className="fixed inset-0 bg-white/50 dark:bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow w-full max-w-md relative">
-                        <h3 className="text-xl font-bold mb-4">Update Review</h3>
-                        <p className="font-semibold mb-2">Rating:</p>
-                        <StarRating rating={editRating} setRating={setEditRating} />
-
-                        <p className="font-semibold mt-4 mb-2">Comment:</p>
-                        <textarea
-                            className="w-full border border-gray-300 dark:border-gray-500 p-3 rounded-lg"
-                            rows={3}
-                            value={editComment}
-                            onChange={(e) => setEditComment(e.target.value)}
-                        />
-
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button
-                                onClick={() => setModalOpen(false)}
-                                className="px-3 py-2 rounded-lg bg-neutral-200 dark:bg-neutral-600 hover:bg-gray-400 dark:hover:bg-neutral-700"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleUpdateSubmit}
-                                className="px-3 py-2 rounded-lg bg-[#ffde59] text-black  hover:bg-yellow-400"
-                            >
-                                Update
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                )}
+            </>)}
+        </Motion.div>
     );
 };
 

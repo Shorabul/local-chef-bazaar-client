@@ -1,6 +1,17 @@
-import { Outlet, NavLink, Link, useNavigation, useLocation } from "react-router";
+import {
+    Outlet, NavLink, Link,
+    // useNavigation, useLocation,
+} from "react-router";
 import { useState } from "react";
 import useAuth from "../hooks/useAuth";
+import { IoMenuSharp, IoClose } from "react-icons/io5";
+import ThemeToggle from "../components/ThemeToggle";
+import ProfileDropdown from "../components/ProfileDropdown";
+import Swal from "sweetalert2";
+import { motion as Motion, AnimatePresence } from "framer-motion";
+import Container from "../components/Shared/Container";
+import PageLoader from "../pages/PageLoader/PageLoader";
+// import { useEffect } from "react";
 import {
     User,
     Users,
@@ -10,36 +21,27 @@ import {
     Settings,
     Star,
 } from "lucide-react";
-import { IoMenuSharp, IoClose } from "react-icons/io5";
-import ThemeToggle from "../components/ThemeToggle";
-import ProfileDropdown from "../components/ProfileDropdown";
-import Swal from "sweetalert2";
-import { motion as Motion, AnimatePresence } from "framer-motion";
-import Container from "../components/Shared/Container";
-import PageLoader from "../pages/PageLoader/PageLoader";
-import { useEffect } from "react";
-
 
 export default function DashboardLayout() {
-    const { role, user, logOut } = useAuth();
+    const { user, backendData, logOut } = useAuth();
     const [open, setOpen] = useState(false);
     const [profileToggle, setProfileToggle] = useState(false);
     const handleMenuToggle = () => setOpen(!open);
-    const navigation = useNavigation();
-    const location = useLocation();
-    const [delayedLoader, setDelayedLoader] = useState(false);
+    // const navigation = useNavigation();
+    // const location = useLocation();
+    // const [delayedLoader, setDelayedLoader] = useState(false);
 
-    useEffect(() => {
-        setDelayedLoader(true);
+    // useEffect(() => {
+    //     setDelayedLoader(true);
 
-        const timer = setTimeout(() => {
-            setDelayedLoader(false);
-        }, 500);
+    //     const timer = setTimeout(() => {
+    //         setDelayedLoader(false);
+    //     }, 500);
 
-        return () => clearTimeout(timer);
-    }, [location.pathname]);
-    const showLoader = navigation.state === "loading" || delayedLoader;
+    //     return () => clearTimeout(timer);
+    // }, [location.pathname]);
 
+    // const showLoader = navigation.state === "loading" || delayedLoader;
 
     const handleProfileToggle = () => setProfileToggle(!profileToggle);
 
@@ -64,7 +66,7 @@ export default function DashboardLayout() {
         user: [
             { to: "/dashboard/profile", label: "Profile", icon: User },
             { to: "/dashboard/orders", label: "My Orders", icon: ClipboardList },
-            { to: "/dashboard/review", label: "My Review", icon: Star },
+            { to: "/dashboard/review", label: "My Reviews", icon: Star },
             { to: "/dashboard/favorites", label: "Favorite Meals", icon: Utensils },
         ],
         chef: [
@@ -81,16 +83,16 @@ export default function DashboardLayout() {
         ],
     };
 
-    const activeMenu = menuItems[role] || [];
+    const activeMenu = menuItems[backendData?.role] || [];
 
     return (
         <div className="flex min-h-screen w-full">
-            {showLoader && <PageLoader />}
+            {/* {showLoader && <PageLoader />} */}
             {/* Top Navbar */}
-            <nav className="fixed top-0 left-0 w-full z-50">
+            <nav className="fixed backdrop-blur-xl top-0 left-0 w-full z-50">
                 <Container>
                     <div className="w-full flex justify-between items-center py-3">
-                        {/* Mobile Menu Icon */}
+                        {/* Menu Icon */}
                         <div className="block text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
                             <Motion.div
                                 key={open ? "close" : "open"}
@@ -131,6 +133,7 @@ export default function DashboardLayout() {
                 </Container>
 
             </nav>
+
             {/* Sidebar */}
             <div
                 className={`
@@ -165,8 +168,11 @@ export default function DashboardLayout() {
             </div >
 
             {/* Main Content */}
-            < div className="flex-1 pt-16 overflow-x-hidden" >
-                <Outlet />
+            < div className="flex-1 pt-16 overflow-x-hidden mt-6" >
+                <Container>
+
+                    <Outlet />
+                </Container>
             </div >
         </div >
     );

@@ -1,14 +1,17 @@
 import React from 'react';
 import useAuth from '../hooks/useAuth';
-
+import { Navigate } from "react-router";
 const ChefRoute = ({ children }) => {
-    const { role, roleLoading, loading } = useAuth();
-    if (loading || roleLoading) {
-        return <p>Loading</p>
+    const { backendData, loading, backendLoading } = useAuth();
+
+    if (loading || backendLoading) {
+        return null;
     }
-    if (role !== 'chef') {
-        return <p>Access Forbidden</p>;
+
+    if (backendData?.role !== "chef") {
+        return <Navigate to="/" replace />;
     }
+
     return children;
 };
 

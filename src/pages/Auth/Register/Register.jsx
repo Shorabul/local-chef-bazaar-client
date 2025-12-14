@@ -9,6 +9,7 @@ import { IoLocationOutline } from "react-icons/io5";
 import { motion as Motion } from "framer-motion";
 import AnimatedInput from '../AnimatedInput';
 import Swal from 'sweetalert2';
+import { Eye, EyeOff } from 'lucide-react';
 
 
 const Register = () => {
@@ -17,6 +18,9 @@ const Register = () => {
     const location = useLocation();
     const axiosSecure = useAxiosSecure();
     const [loading, setLoading] = useState(false);
+    const [passShow, setPassShow] = useState(false);
+    const [rePassShow, setRePassShow] = useState(false);
+    console.log()
 
     const { register, handleSubmit, formState: { errors, touchedFields }, watch, setError } = useForm({ mode: "onChange" });
     const password = watch("password");
@@ -96,9 +100,7 @@ const Register = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="max-w-sm mx-auto h-screen pt-10 space-y-5
-            text-neutral-700
-            dark:text-neutral-50"
+            className="max-w-sm mx-auto min-h-screen pt-10 space-y-5"
         >
             {/* Header */}
             <Motion.div
@@ -203,7 +205,7 @@ const Register = () => {
                     touched={touchedFields.password}
                 >
                     <input
-                        type="password"
+                        type={passShow ? 'text' : 'password'}
                         placeholder="Password"
                         {...register("password", {
                             required: "Password is required",
@@ -214,6 +216,12 @@ const Register = () => {
                         dark:bg-neutral-700
                         border-gray-300 dark:border-gray-500'
                     />
+                    <span
+                        onClick={() => setPassShow(!passShow)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    >
+                        {passShow ? <Eye /> : <EyeOff />}
+                    </span>
                 </AnimatedInput>
                 {errors.password && <p className="text-red-600 text-xs">{errors.password.message}</p>}
 
@@ -224,18 +232,23 @@ const Register = () => {
                     touched={touchedFields.confirmPassword}
                 >
                     <input
-                        type="password"
+                        type={rePassShow ? 'text' : 'password'}
                         placeholder="Confirm Password"
                         {...register("confirmPassword", {
                             required: "Confirm Password is required",
                             validate: (value) =>
                                 value === password || "Passwords do not match"
                         })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
+                        className="w-full pl-10 pr-10 py-3 border rounded-lg
+                   bg-neutral-50 dark:bg-neutral-700
+                   border-gray-300 dark:border-gray-500"
                     />
+                    <span
+                        onClick={() => setRePassShow(!rePassShow)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    >
+                        {rePassShow ? <Eye /> : <EyeOff />}
+                    </span>
                 </AnimatedInput>
                 {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message}</p>}
 
@@ -246,7 +259,7 @@ const Register = () => {
                     whileHover={{ scale: 1.02 }}
                     type="submit"
                     disabled={loading}
-                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-yellow-400 hover:bg-yellow-500 font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
+                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] hover:bg-yellow-400 text-black font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
                 >
                     Create an account
                     <LuChevronRight />

@@ -3,6 +3,7 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { Link } from "react-router";
 import Container from "../../../components/Shared/Container";
+import Skeleton from "../../../components/Skeleton";
 
 const Banner = () => {
     const [meals, setMeals] = useState([]);
@@ -35,9 +36,26 @@ const Banner = () => {
         return () => clearInterval(timer);
     }, [meals]);
 
-    if (meals.length === 0) return <div>Loading banner...</div>;
-
     const current = meals[index];
+
+    // Skeleton state
+    if (meals.length === 0) {
+        return (
+            <Container>
+                <div className="relative w-full h-64 md:h-96 lg:h-[700px] overflow-hidden rounded-xl">
+                    {/* Image skeleton */}
+                    <Skeleton className="absolute inset-0 w-full h-full" />
+
+                    {/* Overlay skeletons */}
+                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-center text-center px-4 space-y-4">
+                        <Skeleton className="h-8 w-48 rounded" />
+                        <Skeleton className="h-6 w-32 rounded" />
+                        <Skeleton className="h-10 w-40 rounded-lg" />
+                    </div>
+                </div>
+            </Container>
+        );
+    }
 
     return (
         <Container>

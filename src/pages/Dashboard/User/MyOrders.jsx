@@ -3,155 +3,237 @@ import { useQuery } from '@tanstack/react-query';
 import Swal from 'sweetalert2';
 import useAuth from '../../../hooks/useAuth';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
-import Container from '../../../components/Shared/Container';
-import EmptyState from '../../../components/EmptyState';
+import { LayoutDashboard } from 'lucide-react';
 import Skeleton from '../../../components/Skeleton';
+import EmptyState from '../../../components/EmptyState';
+import { motion as Motion } from "framer-motion";
 
 const MyOrders = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
 
-    // Fetch user's orders
+    const isDark = document.documentElement.classList.contains("dark");
+
     const { data: orders = [], isLoading } = useQuery({
-        queryKey: ['orders', user.email],
+        queryKey: ['orders', user?.email],
         queryFn: async () => {
             const res = await axiosSecure.get(`/orders/user/${user.email}`);
             return res.data;
-        }
+        },
+        enabled: !!user?.email,
     });
 
-    console.log(orders);
-
-    // Handle Stripe payment
     const handlePay = async (order) => {
         const totalPrice = order.price * order.quantity;
 
         const result = await Swal.fire({
-            title: `Your total price is $${totalPrice}`,
-            text: "Do you want to confirm the payment?",
+            title: "Confirm Payment",
+            text: `Your total price is $${totalPrice}. Do you want to proceed?`,
             icon: "question",
+            background: isDark ? "#262626" : "#ffffff",
+            color: isDark ? "#ffffff" : "#262626",
+            iconColor: "#facc15",
             showCancelButton: true,
-            confirmButtonText: "Yes",
+            confirmButtonText: "Yes, Pay Now",
             cancelButtonText: "Cancel",
+            confirmButtonColor: "#ffde59",
+            cancelButtonColor: "#a1a1a1",
         });
 
         if (result.isConfirmed) {
-            const orderInfo = {
-                totalPrice,
-                mealName: order.mealName,
-                customerEmail: user.email,
-                orderId: order._id,
-            };
+            try {
+                const res = await axiosSecure.post(
+                    "/orders/payment-checkout-session",
+                    {
+                        totalPrice,
+                        mealName: order.foodName,
+                        customerEmail: user.email,
+                        orderId: order._id,
+                    }
+                );
 
-            const res = await axiosSecure.post('/orders/payment-checkout-session', orderInfo);
+                // success feedback before redirect
+                await Swal.fire({
+                    icon: "success",
+                    title: "Redirecting to payment...",
+                    text: "Please complete your payment securely.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
+                });
 
-            // redirect to Stripe
-            window.location.assign(res.data.url);
+                window.location.assign(res.data.url);
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: "Payment Failed",
+                    text: "Something went wrong while initiating payment.",
+                    icon: "error",
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
+                    iconColor: "#fb2c36",
+                    confirmButtonColor: "#fb2c36",
+                });
+            }
         }
     };
+
+    // Skeleton Loader (same style as OrderRequests)
     if (isLoading) {
         return (
-            <Container>
-                <div className="overflow-x-auto w-full mt-6">
+            <div className="p-6">
+                <div className="flex flex-col items-center justify-center mb-6">
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-4 w-32" />
+                </div>
+
+                <div className="overflow-x-auto">
                     <table className="table w-full">
                         <thead>
-                            <tr className="bg-[#ffde59] text-black">
-                                <th>#</th>
-                                <th>Meal Name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Order Status</th>
-                                <th>Payment Status</th>
-                                <th>Chef Name</th>
-                                <th>Chef ID</th>
-                                <th>Order Time</th>
-                                <th>Action</th>
+                            <tr className="bg-yellow-400 text-black">
+                                {Array.from({ length: 10 }).map((_, i) => (
+                                    <th key={i} className="px-4 py-2">
+                                        <Skeleton className="h-4 w-20" />
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-
                         <tbody>
                             {[1, 2, 3, 4].map((i) => (
                                 <tr key={i}>
-                                    <td><Skeleton className="h-4 w-6" /></td>
-                                    <td><Skeleton className="h-4 w-32" /></td>
-                                    <td><Skeleton className="h-4 w-16" /></td>
-                                    <td><Skeleton className="h-4 w-10" /></td>
-                                    <td><Skeleton className="h-4 w-20" /></td>
-                                    <td><Skeleton className="h-4 w-20" /></td>
-                                    <td><Skeleton className="h-4 w-28" /></td>
-                                    <td><Skeleton className="h-4 w-20" /></td>
-                                    <td><Skeleton className="h-4 w-24" /></td>
-                                    <td><Skeleton className="h-8 w-20" /></td>
+                                    {Array.from({ length: 10 }).map((_, j) => (
+                                        <td key={j} className="px-4 py-3">
+                                            <Skeleton className="h-4 w-full" />
+                                        </td>
+                                    ))}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-            </Container>
+            </div>
         );
     }
 
-    if (!orders.data || orders.data.length === 0) {
-        return (
-            <Container>
-                <EmptyState message="You have no orders yet." />
-            </Container>
-        );
-    }
+    // Animation Variants
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.4,
+                ease: "easeOut",
+                staggerChildren: 0.05,
+            },
+        },
+    };
 
+    const rowVariants = {
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0 },
+    };
 
     return (
-        <Container>
-            <div className="overflow-x-auto w-full mt-6 bg-neutral-50 dark:bg-neutral-600">
-                <table className="table w-full">
-                    <thead>
-                        <tr className='bg-[#ffde59] text-black'>
-                            <th>#</th>
-                            <th>Meal Name</th>
-                            <th>Price</th>
-                            <th>Quantity</th>
-                            <th>Order Status</th>
-                            <th>Payment Status</th>
-                            <th>Chef Name</th>
-                            <th>Chef ID</th>
-                            <th>Order Time</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {orders.data?.map((order, i) => (
-                            <tr key={order?._id}
-                                className='text-gray-500 dark:text-gray-300'
-                            >
-                                <th>{i + 1}</th>
-                                <td>{order?.mealName}</td>
-                                <td>${order?.price}</td>
-                                <td>{order?.quantity}</td>
-                                <td>{order?.orderStatus}</td>
-                                <td>{order?.paymentStatus}</td>
-                                <td>{order?.chefName || 'Unknown'}</td>
-                                <td>{order?.chefId}</td>
-                                <td>{new Date(order?.orderTime).toLocaleString()}</td>
-                                <td>
-                                    {
-                                        order.paymentStatus !== 'paid' && <button
-                                            onClick={() => handlePay(order)}
-                                            disabled={!(order.orderStatus === 'accepted' && order.paymentStatus === 'Pending')}
-                                            className={`py-1 px-3 rounded font-semibold ${order.orderStatus === 'accepted' && order.paymentStatus === 'Pending'
-                                                ? 'bg-green-500 text-white hover:bg-green-600 cursor-pointer'
-                                                : 'bg-gray-400 text-gray-700 cursor-not-allowed'
-                                                }`}
-                                        >
-                                            Pay
-                                        </button>
-                                    }
-                                </td>
+        <Motion.div
+            className="overflow-x-auto w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            {/* Header */}
+            <Motion.div className="text-center mb-6">
+                <h1 className="font-bold text-2xl">My Orders</h1>
+                <p className="flex justify-center gap-2 text-sm opacity-80">
+                    <LayoutDashboard size={16} /> Dashboard / My Orders
+                </p>
+            </Motion.div>
+
+            {/* Empty State */}
+            {orders.data?.length === 0 ? (
+                <EmptyState message="You have no orders yet." />
+            ) : (
+                /* Table */
+                <div className="overflow-x-auto rounded-xl shadow bg-neutral-50 dark:bg-neutral-700">
+                    <table className="table-auto w-full text-left">
+                        <thead className="bg-[#ffde59] text-black text-sm uppercase tracking-wide">
+                            <tr>
+                                <th className="px-4 py-3">#</th>
+                                <th className="px-4 py-3">Meal</th>
+                                <th className="px-4 py-3">Price</th>
+                                <th className="px-4 py-3">Qty</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Payment</th>
+                                <th className="px-4 py-3">Chef</th>
+                                <th className="px-4 py-3">Date</th>
+                                <th className="px-4 py-3">Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </Container>
+                        </thead>
+
+                        <tbody className="text-neutral-600 dark:text-neutral-300 text-sm">
+                            {orders?.data.map((order, i) => {
+                                const canPay =
+                                    order?.orderStatus === 'accepted' || order?.orderStatus === "delivered";
+
+                                return (
+                                    <Motion.tr
+                                        key={order?._id}
+                                        variants={rowVariants}
+                                        whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.03)" }}
+                                        className="border-b border-neutral-200 dark:border-neutral-600 transition"
+                                    >
+                                        <td className="px-4 py-3">{i + 1}</td>
+                                        <td className="px-4 py-3 font-semibold">{order?.foodName}</td>
+                                        <td className="px-4 py-3">${order?.price}</td>
+                                        <td className="px-4 py-3">{order?.quantity}</td>
+
+                                        <td className="px-4 py-3">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-bold text-white ${order.orderStatus === 'pending' ? 'bg-yellow-500' : order.orderStatus === 'accepted' ? 'bg-blue-500' : order.orderStatus === 'cancelled' ? 'bg-red-500' : 'bg-green-500'}`}
+                                            >
+                                                {order?.orderStatus}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-4 py-3 font-medium">
+                                            {order?.paymentStatus}
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            <div className='flex flex-col'>
+                                                <span>{order?.chefName || 'Unknown'}</span>
+                                                <span>{order?.chefId || 'Unknown'}</span>
+                                            </div>
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            {new Date(order?.createAt).toLocaleString()}
+                                        </td>
+
+                                        <td className="px-4 py-3">
+                                            {order?.paymentStatus !== 'paid' && (
+                                                <button
+                                                    disabled={!canPay}
+                                                    onClick={() => handlePay(order)}
+                                                    className={`px-3 py-2 rounded-lg text-white text-xs md:text-sm lg:text-base font-semibold
+                                                        ${canPay
+                                                            ? "bg-green-500 hover:bg-green-600"
+                                                            : "bg-gray-400 cursor-not-allowed"
+                                                        }`}
+                                                >
+                                                    Pay
+                                                </button>
+                                            )}
+                                        </td>
+                                    </Motion.tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </Motion.div>
     );
 };
 

@@ -9,11 +9,10 @@ const googleProvider = new GoogleAuthProvider();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [role, setRole] = useState(null);
-    const [roleLoading, setRoleLoading] = useState(true);
+    const [backendData, setBackendData] = useState(null);
+    const [backendLoading, setBackendLoading] = useState(true);
     const axiosSecure = useAxiosSecure();
-    // console.log(user);
-    // console.log(role);
+
 
     const registerUser = (email, password) => {
         setLoading(true);
@@ -30,10 +29,6 @@ const AuthProvider = ({ children }) => {
         return signInWithPopup(auth, googleProvider);
     };
 
-    // const logOut = () => {
-    //     setLoading(true);
-    //     return signOut(auth);
-    // };
     const logOut = async () => {
         setLoading(true);
         await axiosSecure.post("/logout"); // clears cookie
@@ -50,40 +45,37 @@ const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unSubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-
-            if (currentUser?.email) {
-                try {
-                    setRoleLoading(true);
-
-                    const res = await axiosSecure.get(`/users/${currentUser.email}`);
-                    setRole(res.data?.role || 'user');
-
-                    // Now you can get chefId
-                    setUser(prev => ({ ...prev, chefId: res.data?.chefId }));
-                } catch (error) {
-                    setRole('user');
-                    console.log(error);
-                } finally {
-                    setRoleLoading(false);
-                }
-            }
-            else {
-                setRole(null);
-                setRoleLoading(false);
-            }
-
             setLoading(false);
+
+            if (!currentUser?.email) {
+                setBackendData(null);
+                setBackendLoading(false);
+                return;
+            }
+
+            try {
+                setBackendLoading(true);
+
+                const res = await axiosSecure.get(`/users/${currentUser.email}`);
+                const { role, status, chefId } = res.data;
+                setBackendData({ role, status, chefId });
+            } catch (error) {
+                console.error(error);
+                setBackendData({ role: 'user', status: 'active', chefId: null });
+            } finally {
+                setBackendLoading(false);
+            }
         });
 
         return () => unSubscribe();
-    }, [axiosSecure]);
+    }, [axiosSecure, user]);
 
 
     const authInfo = {
         user,
         loading,
-        role,
-        roleLoading,
+        backendData,
+        backendLoading,
         registerUser,
         logInUser,
         signInGoogle,

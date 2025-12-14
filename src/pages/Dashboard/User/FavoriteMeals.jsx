@@ -1,11 +1,12 @@
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
-import Swal from "sweetalert2";
-import Container from "../../../components/Shared/Container";
-import { useQuery } from "@tanstack/react-query";
+import { LayoutDashboard } from "lucide-react";
 import Skeleton from "../../../components/Skeleton";
 import EmptyState from "../../../components/EmptyState";
+import { motion as Motion } from "framer-motion";
 
 const FavoriteMeals = () => {
     const { user } = useAuth();
@@ -13,51 +14,42 @@ const FavoriteMeals = () => {
 
     const isDark = document.documentElement.classList.contains("dark");
 
-
-    // Fetch favorite meals using React Query
     const { data: favorites = [], isLoading, refetch } = useQuery({
         queryKey: ["favorites", user?.email],
         queryFn: async () => {
             const res = await axiosSecure.get(`/favorites?userEmail=${user.email}`);
             return res.data.data || res.data;
         },
-        enabled: !!user?.email, // Only run when email exists
+        enabled: !!user?.email,
     });
 
-    // Delete a favorite meal
     const handleDelete = async (mealId) => {
-        const result = await
-            Swal.fire({
-                title: "Are you sure?",
-                text: "Do you want to remove this meal from favorites?",
-                icon: "warning",
-
-                background: isDark ? "#262626" : "#ffffff",
-                color: isDark ? "#ffffff" : "#262626",
-                iconColor: isDark ? "#facc15" : "#facc15",
-
-                showCancelButton: true,
-                confirmButtonText: "Yes, delete it!",
-                cancelButtonText: "Cancel",
-
-                confirmButtonColor: "#fb2c36",
-                cancelButtonColor: "#525252",
-            });
-
-
+        const result = await Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to remove this meal from favorites?",
+            icon: "warning",
+            background: isDark ? "#262626" : "#ffffff",
+            color: isDark ? "#ffffff" : "#262626",
+            iconColor: "#facc15",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#fb2c36",
+            cancelButtonColor: "#a1a1a1",
+        });
 
         if (result.isConfirmed) {
             try {
                 await axiosSecure.delete(`/favorites/${mealId}`);
 
                 Swal.fire({
-                    background: isDark ? "#262626" : "#ffffff",
-                    color: isDark ? "#ffffff" : "#262626",
                     icon: "success",
                     title: "Deleted!",
-                    text: "Meal removed from favorites successfully.",
+                    text: "Meal removed from favorites.",
                     timer: 2000,
                     showConfirmButton: false,
+                    background: isDark ? "#262626" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#262626",
                 });
 
                 refetch();
@@ -65,105 +57,138 @@ const FavoriteMeals = () => {
                 console.log(error);
                 Swal.fire({
                     title: "Error",
-                    text: "Failed to delete this favorite meal",
+                    text: "Failed to delete favorite meal",
                     icon: "error",
                     background: isDark ? "#262626" : "#ffffff",
                     color: isDark ? "#ffffff" : "#262626",
-                    iconColor: isDark ? "#f87171" : "#dc2626",
-                    confirmButtonColor: "#ef4444",
+                    iconColor: "#fb2c36",
+                    confirmButtonColor: "#fb2c36",
                 });
             }
         }
     };
 
-    // React Query loading state
+    // Skeleton Loader
     if (isLoading) {
         return (
-            <Container>
-                <div className="overflow-x-auto w-full mt-6">
+            <div className="p-6">
+                <div className="flex flex-col items-center justify-center mb-6">
+                    <Skeleton className="h-8 w-40 mb-2" />
+                    <Skeleton className="h-4 w-32" />
+                </div>
+
+                <div className="overflow-x-auto">
                     <table className="table w-full">
                         <thead>
-                            <tr className="bg-[#ffde59] text-black">
-                                <th>#</th>
-                                <th>Meal Name</th>
-                                <th>Chef Name</th>
-                                <th>Price</th>
-                                <th>Date Added</th>
-                                <th>Action</th>
+                            <tr className="bg-yellow-400 text-black">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <th key={i} className="px-4 py-2">
+                                        <Skeleton className="h-4 w-20" />
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-
                         <tbody>
-                            {[1, 2, 3, 4, 5].map((i) => (
+                            {[1, 2, 3, 4].map((i) => (
                                 <tr key={i}>
-                                    <td><Skeleton className="h-4 w-6" /></td>
-                                    <td><Skeleton className="h-4 w-32" /></td>
-                                    <td><Skeleton className="h-4 w-28" /></td>
-                                    <td><Skeleton className="h-4 w-16" /></td>
-                                    <td><Skeleton className="h-4 w-20" /></td>
-                                    <td><Skeleton className="h-8 w-20" /></td>
+                                    {Array.from({ length: 6 }).map((_, j) => (
+                                        <td key={j} className="px-4 py-3">
+                                            <Skeleton className="h-4 w-full" />
+                                        </td>
+                                    ))}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-            </Container>
+            </div>
         );
     }
 
-    if (!favorites.length) {
-        return <Container><EmptyState message="No favorite meals added yet." /></Container>;
-    }
+    // Animation
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.4,
+                ease: "easeOut",
+                staggerChildren: 0.05,
+            },
+        },
+    };
 
+    const rowVariants = {
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0 },
+    };
 
     return (
-        <Container>
-            <div className="overflow-x-auto w-full mt-6 bg-neutral-50 dark:bg-neutral-600">
-                <table className="table w-full">
-                    <thead>
-                        <tr className="bg-[#ffde59] text-black">
-                            <th>#</th>
-                            <th>Meal Name</th>
-                            <th>Chef Name</th>
-                            <th>Price</th>
-                            <th>Date Added</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+        <Motion.div
+            className="overflow-x-auto w-full"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            {/* Header */}
+            <Motion.div className="text-center mb-6">
+                <h1 className="font-bold text-2xl">Favorite Meals</h1>
+                <p className="flex justify-center gap-2 text-sm opacity-80">
+                    <LayoutDashboard size={16} /> Dashboard / Favorite Meals
+                </p>
+            </Motion.div>
 
-                    <tbody>
-                        {favorites.map((fav, i) => (
-                            <tr key={fav._id}>
-                                <td>{i + 1}</td>
-                                <td>{fav.mealName}</td>
-                                <td>{fav.chefName}</td>
-                                <td>
-                                    {fav.price
-                                        ? `$${parseFloat(fav.price).toFixed(2)}`
-                                        : "N/A"}
-                                </td>
-
-                                {/* date formatting */}
-                                <td>
-                                    {fav.addedTime
-                                        ? new Date(fav.addedTime).toLocaleDateString()
-                                        : "N/A"}
-                                </td>
-
-                                <td>
-                                    <button
-                                        onClick={() => handleDelete(fav._id)}
-                                        className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600"
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
+            {/* Empty State */}
+            {favorites.length === 0 ? (
+                <EmptyState message="No favorite meals added yet." />
+            ) : (
+                /* Table */
+                <div className="overflow-x-auto rounded-xl shadow bg-neutral-50 dark:bg-neutral-700">
+                    <table className="table-auto w-full text-left">
+                        <thead className="bg-[#ffde59] text-black text-sm uppercase tracking-wide">
+                            <tr>
+                                <th className="px-4 py-3">#</th>
+                                <th className="px-4 py-3">Meal Name</th>
+                                <th className="px-4 py-3">Chef Name</th>
+                                <th className="px-4 py-3">Price</th>
+                                <th className="px-4 py-3">Date</th>
+                                <th className="px-4 py-3">Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </Container>
+                        </thead>
+
+                        <tbody className="text-neutral-600 dark:text-neutral-300 text-sm">
+                            {favorites.map((fav, i) => (
+                                <Motion.tr
+                                    key={fav._id}
+                                    variants={rowVariants}
+                                    whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.03)" }}
+                                    className="border-b border-neutral-200 dark:border-neutral-600 transition"
+                                >
+                                    <td className="px-4 py-3">{i + 1}</td>
+                                    <td className="px-4 py-3 font-semibold">{fav.foodName}</td>
+                                    <td className="px-4 py-3">{fav.chefName}</td>
+                                    <td className="px-4 py-3">
+                                        {fav.price ? `$${Number(fav.price).toFixed(2)}` : "N/A"}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {new Date(fav?.createAt).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <button
+                                            onClick={() => handleDelete(fav._id)}
+                                            className="px-3 py-2 rounded-lg text-white text-xs md:text-sm lg:text-base font-semibold bg-red-500 hover:bg-red-600"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </Motion.tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </Motion.div>
     );
 };
 
