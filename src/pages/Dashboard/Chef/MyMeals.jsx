@@ -7,7 +7,7 @@ import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Skeleton from "../../../components/Skeleton";
 import EmptyState from "../../../components/EmptyState";
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Trash2, Edit } from "lucide-react";
 import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const MyMeals = () => {
@@ -74,12 +74,10 @@ const MyMeals = () => {
         }
     };
 
-
-    // Skeleton Loader 
     if (isLoading) {
         return (
             <div className="p-6">
-                <div className="flex flex-col items-center mb-6">
+                <div className="flex flex-col items-center mb-10"> {/* Increased bottom margin */}
                     <Skeleton className="h-8 w-40 mb-2" />
                     <Skeleton className="h-4 w-32" />
                 </div>
@@ -88,17 +86,16 @@ const MyMeals = () => {
                     {Array.from({ length: 6 }).map((_, i) => (
                         <div
                             key={i}
-                            className="border rounded-lg shadow p-4 bg-neutral-100 dark:bg-neutral-800"
+                            className="rounded-xl shadow-lg p-6 bg-neutral-200 dark:bg-neutral-800 border dark:border-neutral-700" // Updated styling
                         >
-                            <Skeleton className="h-40 w-full mb-3 rounded-md" />
-                            <Skeleton className="h-6 w-32 mb-2" />
-                            <Skeleton className="h-4 w-24 mb-1" />
-                            <Skeleton className="h-4 w-28 mb-1" />
-                            <Skeleton className="h-4 w-20 mb-1" />
-                            <Skeleton className="h-4 w-28 mb-3" />
-                            <div className="flex gap-2">
-                                <Skeleton className="h-10 w-20" />
-                                <Skeleton className="h-10 w-20" />
+                            <Skeleton className="h-48 w-full mb-4 rounded-xl" /> {/* Taller image placeholder */}
+                            <Skeleton className="h-6 w-3/4 mb-3" />
+                            <Skeleton className="h-4 w-full mb-1" />
+                            <Skeleton className="h-4 w-1/2 mb-1" />
+                            <Skeleton className="h-4 w-2/3 mb-4" />
+                            <div className="flex gap-4"> {/* Increased gap */}
+                                <Skeleton className="h-10 w-24 rounded-lg" />
+                                <Skeleton className="h-10 w-24 rounded-lg" />
                             </div>
                         </div>
                     ))}
@@ -113,14 +110,14 @@ const MyMeals = () => {
         hidden: {},
         visible: {
             transition: {
-                staggerChildren: 0.06,
+                staggerChildren: 0.1,
             },
         },
     };
 
     const cardVariants = {
-        hidden: { opacity: 0, scale: 0.92 },
-        visible: { opacity: 1, scale: 1 },
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
     };
 
     return (
@@ -128,13 +125,17 @@ const MyMeals = () => {
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="min-h-screen w-full p-4"
+            className="min-h-screen w-full transition-colors duration-300"
         >
+
             {/* Header */}
-            <Motion.div variants={cardVariants} className="text-center mb-6">
-                <h1 className="font-bold text-3xl">My Meals</h1>
-                <p className="flex justify-center gap-2 text-sm opacity-80 mt-1">
-                    <LayoutDashboard size={16} /> Dashboard / My Meals
+            <Motion.div className="flex flex-col items-center justify-center mb-6">
+                <h1 className="text-center font-bold text-2xl">My Meals</h1>
+                <p className="flex gap-2">
+                    <span className="opacity-80 flex items-center gap-2">
+                        <LayoutDashboard size={16} />Dashboard
+                    </span>
+                    <span>/ my meals</span>
                 </p>
             </Motion.div>
 
@@ -145,76 +146,57 @@ const MyMeals = () => {
                 //Meal Cards 
                 <Motion.div
                     variants={containerVariants}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
                 >
                     {meals.map((meal) => (
                         <Motion.div
                             key={meal._id}
                             variants={cardVariants}
-                            whileHover={{ scale: 1.02 }}
-                            className="rounded-lg shadow-md p-4 bg-neutral-50 dark:bg-neutral-600 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-all ease-in-out"
-                        >
-                            {/* Meal Image */}
-                            <img
-                                src={meal.foodImage}
-                                alt={meal.foodName}
-                                className="w-full h-40 object-cover rounded-md mb-3"
-                            />
+                            whileHover={{
+                                scale: 1.03,
+                                boxShadow: isDark ? "0 15px 30px rgba(0, 0, 0, 0.4)" : "0 10px 20px rgba(0, 0, 0, 0.1)"
+                            }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                            className="rounded-xl shadow-lg border border-transparent hover:border-yellow-500/50 p-5 bg-white dark:bg-neutral-800 transition-all duration-300 overflow-hidden" >
+
+                            {/* Meal Image Container for better aspect ratio control */}
+                            <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
+                                <img
+                                    src={meal.foodImage}
+                                    alt={meal.foodName}
+                                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                />
+                            </div>
 
                             {/* Meal Information */}
-                            <h2 className="text-xl font-bold mb-1">{meal.foodName}</h2>
+                            <h2 className="text-2xl font-extrabold mb-2 truncate">
+                                {meal.foodName}
+                            </h2>
+                            <p className="text-3xl font-bold text-[#ffde59] mb-4">${meal.price}</p> {/* Highlighted Price */}
 
-                            {/* <div className="text-gray-500 dark:text-gray-300 text-sm space-y-1">
-                                {Object.entries(meal).map(([key, value]) => {
-                                    // Skip unwanted fields
-                                    if (key === "_id" || key === "foodImage") return null;
-
-                                    // Format arrays
-                                    const displayValue = Array.isArray(value)
-                                        ? value.join(", ")
-                                        : value;
-
-                                    return (
-                                        <p key={key}>
-                                            <strong className="capitalize">
-                                                {key.replace(/([A-Z])/g, " $1")}:
-                                            </strong>{" "}
-                                            {displayValue}
-                                        </p>
-                                    );
-                                })}
-                            </div> */}
-                            {/* Meal Information */}
-                            <div className="text-gray-700 dark:text-gray-200 text-sm space-y-1">
-                                <p><strong>Chef Id:</strong> {meal.chefId}</p>
-                                <p><strong>Chef Name:</strong> {meal.chefName}</p>
-                                <p><strong>Chef Email:</strong> {meal.chefEmail}</p>
-                                <p><strong>Food Name:</strong> {meal.foodName}</p>
-                                <p><strong>Ingredients:</strong> {meal.ingredients?.join(", ")}</p>
-                                <p><strong>Price:</strong> ${meal.price}</p>
-                                <p><strong>Chef Experience:</strong> {meal.chefExperience}</p>
-                                <p><strong>Delivery Time:</strong> {meal.deliveryTime}</p>
-                                <p><strong>Delivery Area:</strong> {meal.deliveryArea}</p>
-                                <p><strong>Delivery Radius:</strong> {meal.deliveryRadius}</p>
-                                <p><strong>Rating:</strong> {meal.rating}</p>
-                                <p><strong>Date:</strong> {new Date(meal.createAt).toLocaleString()}</p>
+                            <div className="text-sm space-y-2 text-gray-600 dark:text-gray-300 border-t pt-4 mt-4 border-gray-100 dark:border-neutral-700">
+                                <InfoItem label="Chef" value={meal.chefName} />
+                                <InfoItem label="Experience" value={meal.chefExperience} />
+                                <InfoItem label="Delivery Time" value={meal.deliveryTime} />
+                                <InfoItem label="Rating" value={`${meal.rating} / 5`} className="font-semibold text-amber-500 dark:text-amber-400" />
+                                <InfoItem label="Created" value={new Date(meal.createdAt).toLocaleDateString()} />
                             </div>
 
 
                             {/* Actions */}
-                            <div className="flex gap-2 mt-4">
+                            <div className="flex gap-4 mt-6">
                                 <button
                                     onClick={() => handleDelete(meal._id)}
-                                    className="px-3 py-2  bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold shadow-md hover:shadow-lg transition-all"
                                 >
-                                    Delete
+                                    <Trash2 size={18} /> Delete
                                 </button>
 
                                 <Link
                                     to={`/dashboard/meal-update/${meal._id}`}
-                                    className="px-3 py-2  bg-[#ffde59] text-black rounded-lg hover:bg-yellow-400 font-semibold"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#ffde59] text-black rounded-lg hover:bg-yellow-400 font-semibold shadow-md hover:shadow-lg transition-all"
                                 >
-                                    Update
+                                    <Edit size={18} /> Update
                                 </Link>
                             </div>
                         </Motion.div>
@@ -226,5 +208,13 @@ const MyMeals = () => {
         </Motion.div>
     );
 };
+
+// Helper component for cleaner information display
+const InfoItem = ({ label, value, className = "" }) => (
+    <p className={`flex justify-between items-center ${className}`}>
+        <strong className="font-medium">{label}:</strong>
+        <span className="ml-2 truncate">{value}</span>
+    </p>
+);
 
 export default MyMeals;

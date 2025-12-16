@@ -12,7 +12,7 @@ const MealCard = ({ meal }) => {
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
-            className="bg-neutral-50 dark:bg-neutral-600 hover:bg-gray-200 dark:hover:bg-neutral-700 shadow rounded-xl overflow-hidden w-full max-w-sm"
+            className="shadow-lg rounded-xl overflow-hidden w-full max-w-sm"
         >
             {/* Meal Image */}
             <img

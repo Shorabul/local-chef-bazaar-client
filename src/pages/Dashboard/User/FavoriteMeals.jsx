@@ -70,6 +70,15 @@ const FavoriteMeals = () => {
         }
     };
 
+    const dateOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Use AM/PM format
+    };
+
     // Skeleton Loader
     if (isLoading) {
         return (
@@ -134,10 +143,13 @@ const FavoriteMeals = () => {
             animate="visible"
         >
             {/* Header */}
-            <Motion.div className="text-center mb-6">
-                <h1 className="font-bold text-2xl">Favorite Meals</h1>
-                <p className="flex justify-center gap-2 text-sm opacity-80">
-                    <LayoutDashboard size={16} /> Dashboard / Favorite Meals
+            <Motion.div className="flex flex-col items-center justify-center mb-6">
+                <h1 className="text-center font-bold text-2xl">Favorite Meals</h1>
+                <p className="flex gap-2">
+                    <span className="opacity-80 flex items-center gap-2">
+                        <LayoutDashboard size={16} />Dashboard
+                    </span>
+                    <span>/ favorite meals</span>
                 </p>
             </Motion.div>
 
@@ -159,26 +171,27 @@ const FavoriteMeals = () => {
                             </tr>
                         </thead>
 
-                        <tbody className="text-neutral-600 dark:text-neutral-300 text-sm">
-                            {favorites.map((fav, i) => (
+                        <tbody className="text-gray-500 dark:text-gray-300 text-sm">
+                            {favorites?.map((fav, i) => (
                                 <Motion.tr
-                                    key={fav._id}
+                                    key={fav?._id}
                                     variants={rowVariants}
                                     whileHover={{ scale: 1.01, backgroundColor: "rgba(0,0,0,0.03)" }}
                                     className="border-b border-neutral-200 dark:border-neutral-600 transition"
                                 >
                                     <td className="px-4 py-3">{i + 1}</td>
-                                    <td className="px-4 py-3 font-semibold">{fav.foodName}</td>
-                                    <td className="px-4 py-3">{fav.chefName}</td>
+                                    <td className="px-4 py-3 font-semibold">{fav?.foodName}</td>
+                                    <td className="px-4 py-3">{fav?.chefName}</td>
                                     <td className="px-4 py-3">
-                                        {fav.price ? `$${Number(fav.price).toFixed(2)}` : "N/A"}
+                                        {fav?.price ? `$${Number(fav.price).toFixed(2)}` : "N/A"}
                                     </td>
                                     <td className="px-4 py-3">
-                                        {new Date(fav?.createAt).toLocaleString()}
+                                        {/* {new Date(fav?.createdAt).toLocaleDateString("en-GB")} */}
+                                        {new Date(fav?.createdAt).toLocaleString('en-US', dateOptions)}
                                     </td>
                                     <td className="px-4 py-3">
                                         <button
-                                            onClick={() => handleDelete(fav._id)}
+                                            onClick={() => handleDelete(fav?._id)}
                                             className="px-3 py-2 rounded-lg text-white text-xs md:text-sm lg:text-base font-semibold bg-red-500 hover:bg-red-600"
                                         >
                                             Delete

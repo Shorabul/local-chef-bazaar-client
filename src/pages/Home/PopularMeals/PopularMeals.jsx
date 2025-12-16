@@ -106,7 +106,7 @@ const PopularMeals = () => {
 
                     <Link
                         to='/meals'
-                        className="py-2 px-3 rounded-lg text-black font-semibold bg-[#ffde59] flex items-center gap-2">
+                        className="py-2 px-3 rounded-lg text-black font-semibold bg-[#ffde59] flex items-center gap-2 mt-4">
                         <span>see more</span>
                         <ArrowRight />
                     </Link>

@@ -154,10 +154,13 @@ const UpdateMeal = () => {
                 className="w-full max-w-4xl space-y-6"
             >
                 {/* Header */}
-                <Motion.div variants={cardVariant} className="text-center">
-                    <h1 className="font-bold text-2xl">Update Meal</h1>
-                    <p className="flex justify-center gap-2 text-sm opacity-80">
-                        <LayoutDashboard size={16} /> Dashboard / Update Meal
+                <Motion.div className="flex flex-col items-center justify-center mb-6">
+                    <h1 className="text-center font-bold text-2xl">Update Meal</h1>
+                    <p className="flex gap-2">
+                        <span className="opacity-80 flex items-center gap-2">
+                            <LayoutDashboard size={16} />Dashboard
+                        </span>
+                        <span>/ update meal</span>
                     </p>
                 </Motion.div>
 

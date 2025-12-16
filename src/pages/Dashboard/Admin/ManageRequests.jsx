@@ -11,7 +11,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 const ManageRequests = () => {
     usePageTitle('Manage Requests');
     const axiosSecure = useAxiosSecure();
-
+    const isDark = document.documentElement.classList.contains("dark");
     const { data: requests = [], refetch, isLoading } = useQuery({
         queryKey: ["roleRequests"],
         queryFn: async () => {
@@ -30,6 +30,10 @@ const ManageRequests = () => {
             Swal.fire({
                 icon: "success",
                 title: `${type} request approved`,
+                timer: 1500,
+                showConfirmButton: false,
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
 
             refetch();
@@ -47,8 +51,12 @@ const ManageRequests = () => {
             });
 
             Swal.fire({
-                icon: "error",
-                title: "Request Rejected",
+                icon: "success",
+                title: "Request Rejected!",
+                timer: 1500,
+                showConfirmButton: false,
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
 
             refetch();
@@ -56,6 +64,15 @@ const ManageRequests = () => {
             console.log(error);
             Swal.fire({ icon: "error", title: "Action failed" });
         }
+    };
+
+    const dateOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Use AM/PM format
     };
 
     // Skeleton while loading
@@ -128,7 +145,7 @@ const ManageRequests = () => {
             {requests.length === 0 ? <EmptyState message="No role requests found." />
                 : <>
                     {/* Table */}
-                    <div className="overflow-x-auto rounded-xl shadow bg-white dark:bg-neutral-800">
+                    <div className="overflow-x-auto rounded-xl shadow bg-white dark:bg-neutral-700">
                         <table className="table-auto w-full text-left">
                             <thead className="bg-[#ffde59] text-black text-sm uppercase tracking-wide">
                                 <tr>
@@ -175,7 +192,9 @@ const ManageRequests = () => {
                                             </span>
                                         </td>
 
-                                        <td className="px-4 py-3">{new Date(req.createdAt).toLocaleString()}</td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            {new Date(req.createdAt).toLocaleString('en-US', dateOptions)}
+                                        </td>
 
                                         {/* Action Buttons */}
                                         <td className="px-4 py-3 flex gap-2">
@@ -204,6 +223,8 @@ const ManageRequests = () => {
 
         </Motion.div>
     );
+
+
 };
 
 export default ManageRequests;

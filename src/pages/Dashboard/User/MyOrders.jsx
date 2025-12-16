@@ -118,6 +118,15 @@ const MyOrders = () => {
         );
     }
 
+    const dateOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Use AM/PM format
+    };
+
     // Animation Variants
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -145,10 +154,13 @@ const MyOrders = () => {
             animate="visible"
         >
             {/* Header */}
-            <Motion.div className="text-center mb-6">
-                <h1 className="font-bold text-2xl">My Orders</h1>
-                <p className="flex justify-center gap-2 text-sm opacity-80">
-                    <LayoutDashboard size={16} /> Dashboard / My Orders
+            <Motion.div className="flex flex-col items-center justify-center mb-6">
+                <h1 className="text-center font-bold text-2xl">My Orders</h1>
+                <p className="flex gap-2">
+                    <span className="opacity-80 flex items-center gap-2">
+                        <LayoutDashboard size={16} />Dashboard
+                    </span>
+                    <span>/ my orders</span>
                 </p>
             </Motion.div>
 
@@ -173,7 +185,7 @@ const MyOrders = () => {
                             </tr>
                         </thead>
 
-                        <tbody className="text-neutral-600 dark:text-neutral-300 text-sm">
+                        <tbody className="text-gray-500 dark:text-gray-300 text-sm">
                             {orders?.data.map((order, i) => {
                                 const canPay =
                                     order?.orderStatus === 'accepted' || order?.orderStatus === "delivered";
@@ -210,7 +222,8 @@ const MyOrders = () => {
                                         </td>
 
                                         <td className="px-4 py-3">
-                                            {new Date(order?.createAt).toLocaleString()}
+                                            {/* {new Date(order?.createdAt).toLocaleDateString("en-GB")} */}
+                                            {new Date(order?.createdAt).toLocaleString('en-US', dateOptions)}
                                         </td>
 
                                         <td className="px-4 py-3">

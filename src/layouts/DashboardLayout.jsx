@@ -19,6 +19,7 @@ import {
 import Logo from "../components/Logo/Logo";
 
 export default function DashboardLayout() {
+    const isDark = document.documentElement.classList.contains("dark");
     const { user, backendData, logOut } = useAuth();
     const [open, setOpen] = useState(false);
     const [profileToggle, setProfileToggle] = useState(false);
@@ -30,11 +31,13 @@ export default function DashboardLayout() {
         try {
             await logOut();
             Swal.fire({
-                position: "top-end",
+                position: 'top',
                 icon: "success",
-                title: "You have successfully logged out",
+                title: `You have successfully logged out`,
+                timer: 1500,
                 showConfirmButton: false,
-                timer: 1500
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
         } catch (error) {
             console.error("Logout failed:", error);
@@ -67,12 +70,12 @@ export default function DashboardLayout() {
     return (
         <div className="flex min-h-screen w-full">
             {/* Top Navbar */}
-            <nav className={`fixed backdrop-blur-xl top-0 left-0 w-full z-50 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600 transition-all duration-300`}>
+            <nav className={`fixed backdrop-blur-xl top-0 left-0 w-full z-50 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-100 dark:border-neutral-600 transition-all duration-300`}>
                 <Container>
                     <div className="w-full flex justify-between items-center py-3">
                         <div className="flex items-center gap-4">
                             {/* Menu Toggle Button */}
-                            <div className="block text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
+                            <div className="block text-3xl cursor-pointer">
                                 <Motion.div
                                     key={open ? "close" : "open"}
                                     initial={{ rotate: open ? -90 : 90, opacity: 0 }}
@@ -107,7 +110,7 @@ export default function DashboardLayout() {
                 className={` hidden lg:block
                     fixed top-0 left-0 min-h-screen z-40
                     transition-[width] duration-300 pt-20 overflow-x-hidden
-                    bg-neutral-50 dark:bg-neutral-700 border-neutral-200 dark:border-neutral-600 border-r
+                    bg-neutral-50 dark:bg-neutral-700 border-neutral-100 dark:border-neutral-600 border-r
                     ${open ? "w-64" : "w-0 lg:w-20"}
                 `}
             >
@@ -119,10 +122,10 @@ export default function DashboardLayout() {
                                 <NavLink
                                     to={item.to}
                                     className={({ isActive }) =>
-                                        `flex items-center p-2 rounded-lg transition-all 
-                                        hover:bg-gray-300 dark:hover:bg-neutral-400
+                                        `flex items-center py-2 px-3  rounded-lg transition-all 
+                                        hover:bg-neutral-300 dark:hover:bg-neutral-500
                                         whitespace-nowrap
-                                        ${isActive ? "font-semibold bg-gray-200 dark:bg-neutral-500" : ""}`
+                                        ${isActive ? "font-semibold bg-neutral-200 dark:bg-neutral-600" : ""}`
                                     }
                                 >
                                     {/* Icon: Centered when closed (desktop), left-margin when open */}
@@ -156,7 +159,7 @@ export default function DashboardLayout() {
                 {/* Sidebar content */}
                 <div
                     className={`${!open ? 'hidden' : 'block'}`}>
-                    <ul className="space-y-2">
+                    <ul className="space-y-2 p-3">
                         {activeMenu.map((item) => {
                             const Icon = item.icon;
                             return (
@@ -164,7 +167,7 @@ export default function DashboardLayout() {
                                     <NavLink
                                         to={item.to}
                                         className={({ isActive }) =>
-                                            `flex items-center gap-3 p-2 rounded-lg transition-all hover:bg-gray-200 dark:hover:bg-gray-600 ${isActive ? "font-semibold" : ""
+                                            `flex items-center gap-3 py-2 px-3 rounded-lg transition-all hover:bg-neutral-300 dark:hover:bg-neutral-500 ${isActive ? "font-semibold bg-neutral-200 dark:bg-neutral-600" : ""
                                             }`
                                         }
                                     >
@@ -182,7 +185,7 @@ export default function DashboardLayout() {
             {/* Main Content */}
             <div
                 className={`
-                    flex-1 pt-16 mt-6 transition-all duration-300 overflow-x-hidden
+                    flex-1 mt-25 transition-all duration-300 overflow-x-hidden
                     /* Mobile: Content always has 0 margin (sidebar is overlay) */
                     ml-0 
                     /* Desktop: Content pushed by sidebar width */

@@ -11,7 +11,7 @@ import StarRating from "../StarRating/StarRating";
 import Skeleton from "../../components/Skeleton";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
-// --- Framer Motion Variants ---
+// Framer Motion Variants
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -40,7 +40,6 @@ const imageVariants = {
         transition: { duration: 0.6, ease: "easeOut" },
     },
 };
-// ---------------------------
 
 const MealDetails = () => {
     const isDark = document.documentElement.classList.contains("dark");
@@ -50,7 +49,7 @@ const MealDetails = () => {
 
     const [newReview, setNewReview] = useState("");
     const [rating, setRating] = useState(0);
-    const [isFavoriteLocal, setIsFavoriteLocal] = useState(false); // Local state for immediate UI feedback
+    const [isFavoriteLocal, setIsFavoriteLocal] = useState(false);
 
 
     // GET: meal details
@@ -105,7 +104,6 @@ const MealDetails = () => {
 
     // POST: add favorite
     const handleFavorite = async () => {
-        // Immediate UI feedback
         setIsFavoriteLocal(true);
 
         try {
@@ -125,11 +123,11 @@ const MealDetails = () => {
         } catch (error) {
             console.log(error);
             toastError("Add Failed", "Failed to add favorite.");
-            setIsFavoriteLocal(false); // Revert on failure
+            setIsFavoriteLocal(false);
         }
     };
 
-    // Helper toast functions to clean up code
+
     const toastWarning = (title, text) => Swal.fire({ icon: "warning", iconColor: "#facc15", title, text, timer: 1500, showConfirmButton: false, background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626" });
     const toastSuccess = (title, text) => Swal.fire({ icon: "success", title, text, timer: 1500, showConfirmButton: false, background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626" });
     const toastError = (title, text) => Swal.fire({ title, text, icon: "error", background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626", iconColor: "#fb2c36", confirmButtonColor: "#fb2c36" });
@@ -302,12 +300,12 @@ const MealDetails = () => {
                         </Motion.h2>
 
                         <Motion.div
-                            variants={containerVariants} // Use container variant for staggering list
+                            variants={containerVariants}
                             className="space-y-4"
                         >
                             <AnimatePresence>
                                 {reviews.length === 0 && (
-                                    <Motion.p variants={itemVariants} className="text-gray-500 italic p-4 bg-gray-50 dark:bg-neutral-800 rounded-xl">
+                                    <Motion.p variants={itemVariants} className="text-gray-500 dark:text-gray-400 italic p-4 bg-gray-50 dark:bg-neutral-700 rounded-xl">
                                         No reviews yet. Be the first!
                                     </Motion.p>
                                 )}
@@ -324,7 +322,6 @@ const MealDetails = () => {
     );
 };
 
-// --- Sub-components for cleaner JSX ---
 
 // A single row in the details grid
 const DetailItem = ({ icon: Icon, label, value }) => (
@@ -346,7 +343,7 @@ const ReviewCard = ({ review }) => (
         initial="hidden"
         animate="visible"
         exit={{ opacity: 0, y: -20 }}
-        className="bg-white dark:bg-neutral-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-700 flex flex-col sm:flex-row gap-4"
+        className="p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-700 flex flex-col sm:flex-row gap-4"
     >
         <div className="flex-shrink-0">
             <img src={review.userImage} alt={review.userName} className="w-12 h-12 rounded-full object-cover border-2 border-[#ffde59]" />

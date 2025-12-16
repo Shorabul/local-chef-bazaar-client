@@ -25,7 +25,6 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [passShow, setPassShow] = useState(false);
     const [rePassShow, setRePassShow] = useState(false);
-    console.log()
 
     const { register, handleSubmit, formState: { errors, touchedFields }, watch, setError } = useForm({ mode: "onChange" });
     const password = watch("password");

@@ -90,15 +90,4 @@ This project is designed to demonstrate real-world application development skill
 * Stripe Payment API
 * CORS
 
----
-
-## Optional Features Implemented
-
-* Axios interceptors
-* Search functionality
-* Animations
-* Dark / Light mode
-
----
-
 🎉 **Thank you for reviewing Locchef!**

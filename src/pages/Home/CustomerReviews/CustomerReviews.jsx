@@ -14,7 +14,7 @@ const ReviewCard = ({ review }) => {
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-neutral-700 shadow-lg rounded-xl w-[300px] p-5 flex flex-col gap-4"
+            className="bg-white dark:bg-neutral-700 shadow-lg rounded-xl w-lg p-5 flex flex-col gap-4"
         >
             {/* Comma Icons */}
             <div className="flex mb-2">
@@ -54,13 +54,13 @@ const AutoScrollRow = ({ reviews, direction = "left" }) => {
 
     useEffect(() => {
         if (containerRef.current) {
-            setWidth(containerRef.current.scrollWidth / 2); // half, since we duplicate
+            setWidth(containerRef.current.scrollWidth / 2);
         }
     }, [reviews]);
 
     return (
         <div
-            className="relative overflow-hidden w-full h-[260px] my-6"
+            className="relative overflow-hidden w-full h-[320px] my-6"
             ref={containerRef}
         >
             {/* Gradient overlays */}
@@ -73,7 +73,7 @@ const AutoScrollRow = ({ reviews, direction = "left" }) => {
                 transition={{
                     repeat: Infinity,
                     repeatType: "loop",
-                    duration: 20, // adjust speed
+                    duration: 35,
                     ease: "linear",
                 }}
             >

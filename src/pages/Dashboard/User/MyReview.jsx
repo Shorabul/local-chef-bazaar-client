@@ -32,10 +32,10 @@ const MyReview = () => {
             const res = await axiosSecure.get(`/reviews/user/${user.email}`);
             return res.data.data;
         },
-        enabled: !!user?.email, // Only run if user is logged in
+        enabled: !!user?.email,
     });
 
-    console?.log(reviews)
+
 
     // Delete review
     const handleDelete = async (id) => {
@@ -138,6 +138,7 @@ const MyReview = () => {
             });
         }
     };
+
     // Animation Variants
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -192,10 +193,13 @@ const MyReview = () => {
             animate="visible">
 
             {/* Header */}
-            <Motion.div className="text-center mb-6">
-                <h1 className="font-bold text-2xl">My Reviews</h1>
-                <p className="flex justify-center gap-2 text-sm opacity-80">
-                    <LayoutDashboard size={16} /> Dashboard / My Reviews
+            <Motion.div className="flex flex-col items-center justify-center mb-6">
+                <h1 className="text-center font-bold text-2xl">My Reviews</h1>
+                <p className="flex gap-2">
+                    <span className="opacity-80 flex items-center gap-2">
+                        <LayoutDashboard size={16} />Dashboard
+                    </span>
+                    <span>/ my reviews</span>
                 </p>
             </Motion.div>
 
@@ -218,8 +222,9 @@ const MyReview = () => {
                                 </div>
                                 <div>
                                     <p className="font-bold">{rev.userName}</p>
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                                        {new Date(rev.createdAt).toLocaleString()}
+                                    <p
+                                        className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                                        {new Date(rev.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                                     </p>
                                 </div>
                             </div>
@@ -240,7 +245,7 @@ const MyReview = () => {
                         </div>
                         <div className="mt-2">
                             <h1 className="font-semibold">{rev?.foodName}</h1>
-                            <p className="mt-1 text-sm">{rev.comment}</p>
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{rev.comment}</p>
                             <div className="flex items-center gap-1">
                                 {Array.from({ length: rev.rating }).map((_, i) => (
                                     <p key={i} className="text-yellow-400">

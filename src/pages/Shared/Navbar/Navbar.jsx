@@ -103,12 +103,20 @@ const Navbar = () => {
 
                         {/* Profile */}
                         {user ? (
-                            <ProfileDropdown
-                                handleProfileToggle={handleProfileToggle}
-                                user={user}
-                                profileToggle={profileToggle}
-                                handleLogOut={handleLogOut}
-                            ></ProfileDropdown>
+                            <div className='flex items-center gap-4'>
+                                <ProfileDropdown
+                                    handleProfileToggle={handleProfileToggle}
+                                    user={user}
+                                    profileToggle={profileToggle}
+                                    handleLogOut={handleLogOut}
+                                ></ProfileDropdown>
+                                <button
+                                    onClick={handleLogOut}
+                                    className="hidden lg:block py-2 px-3 bg-[#ffde59] text-black rounded-md font-semibold hover:bg-yellow-500 transition"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         ) : (
                             <>
                                 <NavLink
