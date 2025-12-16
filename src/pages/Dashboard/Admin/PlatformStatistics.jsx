@@ -50,7 +50,6 @@ const PlatformStatistics = () => {
         { name: "Pending Orders", value: ordersPending },
         { name: "Delivered Orders", value: ordersDelivered },
     ];
-    console.log(data);
     return (
         <div className="p-6 space-y-8">
             {/* Stats Cards */}

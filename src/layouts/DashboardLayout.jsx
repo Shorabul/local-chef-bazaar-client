@@ -1,17 +1,12 @@
-import {
-    Outlet, NavLink, Link,
-    // useNavigation, useLocation,
-} from "react-router";
+import { Outlet, NavLink } from "react-router";
 import { useState } from "react";
 import useAuth from "../hooks/useAuth";
 import { IoMenuSharp, IoClose } from "react-icons/io5";
 import ThemeToggle from "../components/ThemeToggle";
 import ProfileDropdown from "../components/ProfileDropdown";
 import Swal from "sweetalert2";
-import { motion as Motion, AnimatePresence } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import Container from "../components/Shared/Container";
-import PageLoader from "../pages/PageLoader/PageLoader";
-// import { useEffect } from "react";
 import {
     User,
     Users,
@@ -21,38 +16,19 @@ import {
     Settings,
     Star,
 } from "lucide-react";
-
-
+import Logo from "../components/Logo/Logo";
 
 export default function DashboardLayout() {
-
     const { user, backendData, logOut } = useAuth();
     const [open, setOpen] = useState(false);
     const [profileToggle, setProfileToggle] = useState(false);
+
     const handleMenuToggle = () => setOpen(!open);
-    // const navigation = useNavigation();
-    // const location = useLocation();
-    // const [delayedLoader, setDelayedLoader] = useState(false);
-
-    // useEffect(() => {
-    //     setDelayedLoader(true);
-
-    //     const timer = setTimeout(() => {
-    //         setDelayedLoader(false);
-    //     }, 500);
-
-    //     return () => clearTimeout(timer);
-    // }, [location.pathname]);
-
-    // const showLoader = navigation.state === "loading" || delayedLoader;
-
     const handleProfileToggle = () => setProfileToggle(!profileToggle);
 
     const handleLogOut = async () => {
         try {
-
             await logOut();
-
             Swal.fire({
                 position: "top-end",
                 icon: "success",
@@ -90,37 +66,28 @@ export default function DashboardLayout() {
 
     return (
         <div className="flex min-h-screen w-full">
-            {/* {showLoader && <PageLoader />} */}
             {/* Top Navbar */}
-            <nav className="fixed backdrop-blur-xl top-0 left-0 w-full z-50">
+            <nav className={`fixed backdrop-blur-xl top-0 left-0 w-full z-50 bg-neutral-50 dark:bg-neutral-700 border-b border-neutral-200 dark:border-neutral-600 transition-all duration-300`}>
                 <Container>
                     <div className="w-full flex justify-between items-center py-3">
-                        {/* Menu Icon */}
-                        <div className="block text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
-                            <Motion.div
-                                key={open ? "close" : "open"}
-                                initial={{ rotate: open ? -90 : 90, opacity: 0 }}
-                                animate={{ rotate: 0, opacity: 1 }}
-                                transition={{ duration: 0.2 }}
-                            >
-                                {open ? (
-                                    <IoClose onClick={handleMenuToggle} />
-                                ) : (
-                                    <IoMenuSharp onClick={handleMenuToggle} />
-                                )}
-                            </Motion.div>
+                        <div className="flex items-center gap-4">
+                            {/* Menu Toggle Button */}
+                            <div className="block text-3xl text-neutral-700 dark:text-neutral-50 cursor-pointer">
+                                <Motion.div
+                                    key={open ? "close" : "open"}
+                                    initial={{ rotate: open ? -90 : 90, opacity: 0 }}
+                                    animate={{ rotate: 0, opacity: 1 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    {open ? (
+                                        <IoClose onClick={handleMenuToggle} />
+                                    ) : (
+                                        <IoMenuSharp onClick={handleMenuToggle} />
+                                    )}
+                                </Motion.div>
+                            </div>
+                            <Logo className={'block'} />
                         </div>
-
-                        <Link to="/" className="flex items-center gap-2">
-                            <img
-                                width="45"
-                                height="45"
-                                src="https://i.ibb.co/WNVv4py3/Loc-Chef.png"
-                                alt="Loc Chef"
-                                className="rounded-full shadow-sm"
-                            />
-                            <span className="font-semibold text-lg">Locchef</span>
-                        </Link>
 
                         <div className="flex items-center gap-2">
                             <ProfileDropdown
@@ -128,21 +95,62 @@ export default function DashboardLayout() {
                                 user={user}
                                 profileToggle={profileToggle}
                                 handleLogOut={handleLogOut}
-                            ></ProfileDropdown>
-
+                            />
                             <ThemeToggle />
                         </div>
                     </div>
                 </Container>
-
             </nav>
 
-            {/* Sidebar */}
+            {/* Sidebar Desktop*/}
+            <div
+                className={` hidden lg:block
+                    fixed top-0 left-0 min-h-screen z-40
+                    transition-[width] duration-300 pt-20 overflow-x-hidden
+                    bg-neutral-50 dark:bg-neutral-700 border-neutral-200 dark:border-neutral-600 border-r
+                    ${open ? "w-64" : "w-0 lg:w-20"}
+                `}
+            >
+                <ul className="space-y-2 p-3">
+                    {activeMenu.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <li key={item.to}>
+                                <NavLink
+                                    to={item.to}
+                                    className={({ isActive }) =>
+                                        `flex items-center p-2 rounded-lg transition-all 
+                                        hover:bg-gray-300 dark:hover:bg-neutral-400
+                                        whitespace-nowrap
+                                        ${isActive ? "font-semibold bg-gray-200 dark:bg-neutral-500" : ""}`
+                                    }
+                                >
+                                    {/* Icon: Centered when closed (desktop), left-margin when open */}
+                                    <Icon className={`w-6 h-6 min-w-[24px] ${open ? 'mr-3' : 'mx-auto'}`} />
+
+                                    {/* Text: Visible only when open */}
+                                    <span
+                                        className={`
+                                            transition-opacity duration-300
+                                            ${open ? "block opacity-100" : "hidden opacity-0"}
+                                        `}
+                                    >
+                                        {item.label}
+                                    </span>
+                                </NavLink>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+            {/* Sidebar Mobile and tab  */}
             <div
                 className={`
+                    block
+                    lg:hidden
                     fixed top-0 left-0 min-h-screen z-40
                     transition-all duration-300 pt-20
-                    ${open ? "w-64 bg-white dark:bg-neutral-800" : "w-0"}
+                    ${open ? "w-64 bg-neutral-50 dark:bg-neutral-700 border-neutral-200 dark:border-neutral-600 border-r" : "w-0"}
                 `}
             >
                 {/* Sidebar content */}
@@ -170,13 +178,21 @@ export default function DashboardLayout() {
                 </div >
             </div >
 
-            {/* Main Content */}
-            < div className="flex-1 pt-16 overflow-x-hidden mt-6" >
-                <Container>
 
+            {/* Main Content */}
+            <div
+                className={`
+                    flex-1 pt-16 mt-6 transition-all duration-300 overflow-x-hidden
+                    /* Mobile: Content always has 0 margin (sidebar is overlay) */
+                    ml-0 
+                    /* Desktop: Content pushed by sidebar width */
+                    ${open ? "lg:ml-64" : "lg:ml-20"}
+                `}
+            >
+                <Container>
                     <Outlet />
                 </Container>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 }

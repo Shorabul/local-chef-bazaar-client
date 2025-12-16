@@ -9,10 +9,12 @@ import Swal from 'sweetalert2';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 import { Eye, EyeOff } from 'lucide-react';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import Logo from '../../../components/Logo/Logo';
+import Container from '../../../components/Shared/Container';
 
 const Login = () => {
     usePageTitle("Login");
-
+    const isDark = document.documentElement.classList.contains("dark");
     const { logInUser, user } = useAuth();
     const axiosSecure = useAxiosSecure();
     const location = useLocation();
@@ -47,18 +49,21 @@ const Login = () => {
         setLoading(true);
         try {
 
-            await logInUser(data.email, data.password);
+            const result = await logInUser(data.email, data.password);
 
             await axiosSecure.post("/jwt", { email: data.email });
 
-
             Swal.fire({
-                position: "top-end",
+                position: 'top',
                 icon: "success",
-                title: "You have successfully logged in",
+                title: `Welcome back ${result.user.displayName}`,
+                text: "You have successfully logged in",
+                timer: 1500,
                 showConfirmButton: false,
-                timer: 1500
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
+
 
             // Navigate after successful login
             navigate(location?.state || '/');
@@ -79,103 +84,109 @@ const Login = () => {
 
 
     return (
-        <Motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="max-w-sm mx-auto pt-10 space-y-5 min-h-screen"
-        >
-            {/* Header */}
+        <Container>
+            <nav className='w-full py-3'>
+                <Logo className='block' />
+            </nav>
             <Motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-2"
+                transition={{ duration: 0.4 }}
+                className="max-w-md mx-auto pt-10 space-y-5 min-h-screen"
             >
-                <h1 className="font-bold text-4xl">Welcome back</h1>
-                <div className="flex gap-2 text-neutral-600
-            dark:text-neutral-100">
-                    <p>Don’t have an account?</p>
-                    <Link to="/register" className="underline">Create an account</Link>
-                </div>
-            </Motion.div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Header */}
+                <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-2"
+                >
+                    <h1 className="font-bold text-4xl">Welcome back</h1>
+                    <div className="flex gap-2 text-neutral-800
+            dark:text-neutral-200">
+                        <p>Don’t have an account?</p>
+                        <Link to="/register" className="underline">Create an account</Link>
+                    </div>
+                </Motion.div>
 
-                {/* Email */}
-                <AnimatedInput
-                    icon={LuMail}
-                    error={errors.email}
-                    touched={touchedFields.email}
-                >
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        {...register("email", {
-                            required: "Email is required",
-                            pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email address" },
-                        })}
-                        className="w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500"
-                    />
-                </AnimatedInput>
-                {errors.email && <Motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-red-600 text-xs mt-1"
-                >
-                    {errors.email.message}
-                </Motion.p>}
+                {/* Form */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-                {/* Password */}
-                <AnimatedInput
-                    icon={LuLock}
-                    error={errors.password}
-                    touched={touchedFields.password}
-                >
-                    <input
-                        type={passShow ? 'text' : 'password'}
-                        placeholder="Password"
-                        {...register("password", {
-                            required: "Password is required",
-                            minLength: { value: 6, message: "Password must be at least 6 characters" },
-                        })}
-                        className="w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500"
-                    />
-                    <span
-                        onClick={() => setPassShow(!passShow)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    {/* Email */}
+                    <AnimatedInput
+                        icon={LuMail}
+                        error={errors.email}
+                        touched={touchedFields.email}
                     >
-                        {passShow ? <Eye /> : <EyeOff />}
-                    </span>
-                </AnimatedInput>
-                {errors.password && <Motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-red-600 text-xs mt-1"
-                >
-                    {errors.password.message}
-                </Motion.p>}
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email address" },
+                            })}
+                            className="w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500"
+                        />
+                    </AnimatedInput>
+                    {errors.email && <Motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-red-600 text-xs mt-1"
+                    >
+                        {errors.email.message}
+                    </Motion.p>}
 
-                {/* Submit */}
-                <Motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.02 }}
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] text-black hover:bg-yellow-400 font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
-                >
-                    Login
-                    <LuChevronRight />
-                </Motion.button>
-            </form>
-        </Motion.div>
+                    {/* Password */}
+                    <AnimatedInput
+                        icon={LuLock}
+                        error={errors.password}
+                        touched={touchedFields.password}
+                    >
+                        <input
+                            type={passShow ? 'text' : 'password'}
+                            placeholder="Password"
+                            {...register("password", {
+                                required: "Password is required",
+                                minLength: { value: 6, message: "Password must be at least 6 characters" },
+                            })}
+                            className="w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500"
+                        />
+                        <span
+                            onClick={() => setPassShow(!passShow)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        >
+                            {passShow ? <Eye /> : <EyeOff />}
+                        </span>
+                    </AnimatedInput>
+                    {errors.password && <Motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-red-600 text-xs mt-1"
+                    >
+                        {errors.password.message}
+                    </Motion.p>}
+
+                    {/* Submit */}
+                    <Motion.button
+                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        type="submit"
+                        disabled={loading}
+                        className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] text-black hover:bg-yellow-400 font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
+                    >
+                        Login
+                        <LuChevronRight />
+                    </Motion.button>
+                </form>
+            </Motion.div>
+        </Container>
     );
 };
 

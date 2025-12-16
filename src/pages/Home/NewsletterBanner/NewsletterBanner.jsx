@@ -33,15 +33,15 @@ export default function NewsletterBanner() {
                     <form className="flex w-full md:w-auto gap-2">
                         <input
                             type="email"
-                            placeholder="Your email ..."
-                            className="flex-1 px-4 py-2 rounded-md border border-black focus:outline-none focus:ring-2 focus:ring-black"
+                            placeholder="Your email"
+                            className="flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-neutral-50 text-neutral-500"
                             required
                         />
                         <Motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             type="submit"
-                            className="bg-black text-white px-6 py-2 rounded-md transition"
+                            className="bg-black text-white px-3 py-2 rounded-lg transition"
                         >
                             Subscribe
                         </Motion.button>

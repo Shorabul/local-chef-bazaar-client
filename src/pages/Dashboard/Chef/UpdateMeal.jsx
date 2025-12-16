@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { motion as Motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import axios from "axios";
 import Skeleton from "../../../components/Skeleton";
@@ -11,6 +11,7 @@ import { usePageTitle } from "../../../hooks/usePageTitle";
 
 const UpdateMeal = () => {
     usePageTitle('Update Meal');
+    const navigate = useNavigate();
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
     const { register, handleSubmit, setValue } = useForm();
@@ -90,6 +91,7 @@ const UpdateMeal = () => {
                     background: isDark ? "#262626" : "#ffffff",
                     color: isDark ? "#ffffff" : "#262626",
                 });
+                navigate(-1);
             }
         } catch (err) {
             console.log(err);
@@ -198,6 +200,8 @@ const UpdateMeal = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
                             type="number"
+                            step="0.01"
+                            min="0"
                             placeholder="Price"
                             {...register("price", { required: true })}
                             className="px-3 py-2 rounded-lg border bg-white dark:bg-neutral-800"

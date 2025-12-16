@@ -5,18 +5,53 @@ import Container from "../../components/Shared/Container";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import useAuth from "../../hooks/useAuth";
-import { FaStar } from "react-icons/fa6";
+import { FaStar, FaRegHeart, FaHeart } from "react-icons/fa6";
+import { FiClock, FiMapPin, FiUser, FiAward, FiDollarSign } from "react-icons/fi";
 import StarRating from "../StarRating/StarRating";
 import Skeleton from "../../components/Skeleton";
-import { motion as Motion } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
+
+// --- Framer Motion Variants ---
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.15,
+            delayChildren: 0.1,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 100 },
+    },
+};
+
+const imageVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.6, ease: "easeOut" },
+    },
+};
+// ---------------------------
 
 const MealDetails = () => {
+    const isDark = document.documentElement.classList.contains("dark");
     const { id } = useParams();
     const axiosSecure = useAxiosSecure();
     const { user, backendData } = useAuth();
 
     const [newReview, setNewReview] = useState("");
     const [rating, setRating] = useState(0);
+    const [isFavoriteLocal, setIsFavoriteLocal] = useState(false); // Local state for immediate UI feedback
+
 
     // GET: meal details
     const { data: mealData, isLoading } = useQuery({
@@ -39,11 +74,11 @@ const MealDetails = () => {
     // POST: submit review
     const handleSubmitReview = async () => {
         if (!rating) {
-            Swal.fire("Rating Required", "Please select a rating.", "warning");
+            toastWarning("Rating Required!", "Please select a rating.");
             return;
         }
         if (!newReview.trim()) {
-            Swal.fire("Empty Review", "Please write something.", "warning");
+            toastWarning("Empty Review!", "Please write something.");
             return;
         }
 
@@ -56,22 +91,22 @@ const MealDetails = () => {
                 rating,
                 comment: newReview,
             });
-            Swal.fire("Success!", "Review added successfully!", "success");
+            toastSuccess("Success!", "Review added successfully.");
+
             setNewReview("");
             setRating(0);
-            refetch(); // refresh reviews
+            refetch();
+
         } catch (error) {
             console.log(error);
-            Swal.fire("Error!", "Failed to submit review", "error");
+            toastError("Error!", "Failed to submit review.");
         }
     };
 
     // POST: add favorite
     const handleFavorite = async () => {
-        if (!user || !mealData) {
-            Swal.fire("Login Required", "Please login to add favorites.", "warning");
-            return;
-        }
+        // Immediate UI feedback
+        setIsFavoriteLocal(true);
 
         try {
             const res = await axiosSecure.post("/favorites", {
@@ -83,203 +118,258 @@ const MealDetails = () => {
                 price: mealData.price,
             });
             if (!res.data.success) {
-                Swal.fire("Already Added", "This meal is already a favorite!", "info");
+                toastInfo("Already Added", "This meal is already a favorite!");
             } else {
-                Swal.fire("Added!", "Meal added to favorites!", "success");
+                toastSuccess("Added", "Meal added to favorites!");
             }
         } catch (error) {
             console.log(error);
-            Swal.fire("Error!", "Failed to add favorite.", "error");
+            toastError("Add Failed", "Failed to add favorite.");
+            setIsFavoriteLocal(false); // Revert on failure
         }
     };
+
+    // Helper toast functions to clean up code
+    const toastWarning = (title, text) => Swal.fire({ icon: "warning", iconColor: "#facc15", title, text, timer: 1500, showConfirmButton: false, background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626" });
+    const toastSuccess = (title, text) => Swal.fire({ icon: "success", title, text, timer: 1500, showConfirmButton: false, background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626" });
+    const toastError = (title, text) => Swal.fire({ title, text, icon: "error", background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626", iconColor: "#fb2c36", confirmButtonColor: "#fb2c36" });
+    const toastInfo = (title, text) => Swal.fire({ icon: "info", title, text, timer: 1500, showConfirmButton: false, background: isDark ? "#262626" : "#ffffff", color: isDark ? "#ffffff" : "#262626" });
 
 
     if (isLoading || !mealData) {
         return (
-            <div className="p-6 space-y-6">
-                {/* Image skeleton */}
-                <Skeleton className="w-full md:w-1/2 h-64 rounded-lg" />
-
-                {/* Text skeletons */}
-                <div className="space-y-3">
-                    <Skeleton className="h-6 w-1/3" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/4" />
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-4 w-1/3" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-1/2" />
+            <Container>
+                <div className="flex flex-col md:flex-row gap-8 p-6">
+                    <Skeleton className="w-full md:w-1/2 h-[400px] rounded-2xl" />
+                    <div className="w-full md:w-1/2 space-y-6 py-4">
+                        <Skeleton className="h-10 w-3/4 rounded-lg" />
+                        <Skeleton className="h-6 w-1/4 rounded-lg" />
+                        <div className="space-y-3 pt-4">
+                            <Skeleton className="h-5 w-full rounded" />
+                            <Skeleton className="h-5 w-full rounded" />
+                            <Skeleton className="h-5 w-2/3 rounded" />
+                        </div>
+                        <div className="flex gap-4 mt-8">
+                            <Skeleton className="h-12 w-40 rounded-xl" />
+                            <Skeleton className="h-12 w-40 rounded-xl" />
+                        </div>
+                    </div>
                 </div>
-
-                {/* Button skeletons */}
-                <div className="flex gap-4 mt-4">
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-10 w-40" />
-                </div>
-
-                {/* Review section skeleton */}
-                <div className="mt-10 space-y-4">
-                    <Skeleton className="h-5 w-1/4" />
-                    <Skeleton className="h-20 w-full" />
-                    <Skeleton className="h-10 w-32" />
-                    <Skeleton className="h-5 w-1/4" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                </div>
-            </div>
+            </Container>
         );
     }
 
 
     return (
         <Container>
-            {/* Meal Info */}
-            <div className="flex flex-col md:flex-row gap-6">
-                <Motion.img
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4 }}
-                    src={mealData?.foodImage}
-                    alt={mealData?.foodName}
-                    className="w-full md:w-1/2 h-full object-cover rounded-lg shadow-lg"
-                />
+            <Motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="py-8"
+            >
+                {/* Top Section: Image and Details Card */}
+                <div className="flex flex-col lg:flex-row gap-8 rounded-3xl shadow-xl overflow-hidden">
 
-                <div className="w-full md:w-1/2 space-y-1">
-                    <Motion.h1
-                        initial={{ y: -10, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        className="text-3xl font-bold mb-3"
-                    >
-                        {mealData?.foodName}
-                    </Motion.h1>
-
-                    <p>
-                        <strong className="mr-1 font-semibold">Chef:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefName}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Price:</strong>
-                        <span className="text-gray-500 dark:text-gray-300"> ${mealData?.price}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Rating:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.rating}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Delivery Area:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.deliveryArea}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Delivery Time:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.deliveryTime}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Experience:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefExperience}</span>
-                    </p>
-                    <p>
-                        <strong className="mr-1 font-semibold">Chef ID:</strong>
-                        <span className="text-gray-500 dark:text-gray-300">{mealData?.chefId}</span>
-                    </p>
-                    <div className="flex items-center flex-wrap">
-                        <strong className="mr-1 font-semibold">Ingredients:</strong>
-                        {
-                            mealData?.ingredients.map((ing, i) => (
-                                <p key={i} className="mr-1 text-gray-500 dark:text-gray-300">{ing},</p>
-                            ))
-                        }
-                    </div>
-
-                    <div className="flex gap-4 mt-4">
-                        {backendData.status === 'fraud' ? (
-                            <button
-                                disabled
-                                className="bg-gray-300 px-4 py-2 rounded-lg text-black font-semibold cursor-not-allowed"
-                            >
-                                Order Now
-                            </button>
-                        ) : (
-                            <Link
-                                to={`/order-confirm/${mealData._id}`}
-                                className="bg-[#ffde59] px-4 py-2 rounded-lg text-black font-semibold hover:bg-yellow-400"
-                            >
-                                Order Now
-                            </Link>
-                        )}
-
-                        <button
-                            onClick={handleFavorite}
-                            className="cursor-pointer bg-red-500 px-4 py-2 rounded-lg text-white hover:bg-red-600"
-                        >
-                            ❤️ Add to Favorite
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Review Section */}
-            <div className="mt-10">
-                <p className="font-semibold">Leave a Review</p>
-                <StarRating rating={rating} setRating={setRating} />
-
-                <textarea
-                    className="w-full border border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-600 p-4 rounded-lg mt-3"
-                    rows={3}
-                    placeholder="Write a review..."
-                    value={newReview}
-                    onChange={(e) => setNewReview(e.target.value)}
-                />
-
-                <Motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSubmitReview}
-                    className="cursor-pointer mt-3 text-black bg-[#ffde59] px-4 py-2 rounded-lg hover:bg-yellow-400"
-                >
-                    Submit Review
-                </Motion.button>
-
-                <h2 className="font-semibold mt-6 mb-4">Reviews</h2>
-                {reviews.length === 0 && <p>No reviews yet.</p>}
-
-                {reviews.map((rev) => (
-                    <Motion.div
-                        key={rev._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="border border-gray-300 dark:border-gray-500 bg-neutral-50 dark:bg-neutral-600 p-4 rounded-lg mb-3 shadow-sm"
-                    >
-                        <div className="flex flex-col items-start">
-                            <div className="flex items-center gap-2">
-                                <div>
-                                    <img src={rev.userImage} className="w-10 h-10 rounded-full" />
-                                </div>
-                                <div>
-                                    <p className="font-bold">{rev.reviewerName}</p>
-                                    <p className="text-gray-500 dark:text-gray-300 text-sm mt-1">
-                                        {new Date(rev.createdAt).toLocaleString()}
-                                    </p>
-                                </div>
-                            </div>
-                            <div>
-                                <p className="mt-2">{rev.comment}</p>
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: rev.rating }).map((_, i) => (
-                                        <span
-                                            key={i} className="text-yellow-400">
-                                            <FaStar />
-                                        </span>
-                                    ))}
-                                    <span>{rev.rating}</span>
-                                </div>
-                            </div>
+                    {/* Left Column: Image */}
+                    <Motion.div variants={imageVariants} className="lg:w-1/2 relative h-[300px] lg:h-auto overflow-hidden">
+                        <img
+                            src={mealData?.foodImage}
+                            alt={mealData?.foodName}
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-4 right-4 bg-white/80 dark:bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1">
+                            <FaStar className="text-yellow-400" />
+                            <span className="font-bold">{mealData?.rating}</span>
                         </div>
                     </Motion.div>
-                ))}
-            </div>
+
+                    {/* Right Column: Details Info */}
+                    <div className="lg:w-1/2 p-6 md:p-10 flex flex-col justify-center">
+                        <Motion.div variants={itemVariants}>
+                            <h1 className="text-3xl md:text-4xl font-extrabold mb-2">{mealData?.foodName}</h1>
+                            {/* Chef & ID Block */}
+                            <div className="flex items-center flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                <div className="flex items-center gap-1">
+                                    {/* Use FiUser here */}
+                                    <FiUser className="text-[#ffde59]" />
+                                    <span>By {mealData?.chefName}</span>
+                                </div>
+                                <span className="hidden md:inline">|</span>
+                                <div>ID: {mealData?.chefId}</div>
+                            </div>
+                        </Motion.div>
+
+                        <Motion.div variants={itemVariants} className="text-3xl font-bold text-[#ffde59] mb-6 flex items-center">
+                            <FiDollarSign className="mr-1 h-6 w-6" />{mealData?.price}
+                        </Motion.div>
+
+                        {/* Info Grid */}
+                        <Motion.div variants={containerVariants} className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 mb-8">
+                            <DetailItem icon={FiMapPin} label="Delivery Area" value={mealData?.deliveryArea} />
+                            <DetailItem icon={FiClock} label="Delivery Time" value={mealData?.deliveryTime} />
+                            <DetailItem icon={FiAward} label="Chef Experience" value={mealData?.chefExperience} />
+                        </Motion.div>
+
+                        {/* Ingredients Badges */}
+                        <Motion.div variants={itemVariants} className="mb-8">
+                            <h3 className="font-semibold mb-3 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-[#ffde59]">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Ingredients
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                                {mealData?.ingredients.map((ing, i) => (
+                                    <span key={i} className="px-3 py-1 bg-gray-100 dark:bg-neutral-700 text-sm rounded-full text-gray-700 dark:text-gray-300 capitalize">
+                                        {ing}
+                                    </span>
+                                ))}
+                            </div>
+                        </Motion.div>
+
+                        {/* Action Buttons */}
+                        <Motion.div variants={itemVariants} className="flex flex-wrap gap-4 mt-auto">
+                            {backendData.status === 'fraud' ? (
+                                <button disabled className="flex-1 bg-gray-300 px-6 py-3 rounded-xl text-black font-bold cursor-not-allowed text-center opacity-70">
+                                    Account Restricted
+                                </button>
+                            ) : (
+                                <Link
+                                    to={`/order-confirm/${mealData._id}`}
+                                    className="flex-1 bg-[#ffde59] px-6 py-3 rounded-xl text-black font-bold hover:bg-yellow-400 transition-colors text-center shadow-md hover:shadow-lg flex justify-center items-center gap-2"
+                                >
+                                    Order Now
+                                </Link>
+                            )}
+
+                            <Motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleFavorite}
+                                className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all flex items-center gap-2 shadow-sm hover:shadow-md
+                                    ${isFavoriteLocal
+                                        ? "bg-red-50 border-red-500 text-red-500 dark:bg-red-900/20"
+                                        : "border-gray-300 dark:border-neutral-600 text-gray-700 dark:text-gray-200 hover:border-red-400 hover:text-red-500"
+                                    }`}
+                            >
+                                {isFavoriteLocal ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
+                                {isFavoriteLocal ? "Favorited" : "Favorite"}
+                            </Motion.button>
+                        </Motion.div>
+                    </div>
+                </div>
+
+                {/* Bottom Section: Reviews */}
+                <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* Review Input Form (Sticky on large screens) */}
+                    <div className="lg:col-span-1">
+                        <Motion.div
+                            variants={itemVariants}
+                            className="bg-white dark:bg-neutral-800 p-6 rounded-2xl shadow-lg sticky top-24"
+                        >
+                            <h3 className="text-xl font-bold mb-4">Write a Review</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Share your experience with this meal.</p>
+
+                            <div className="mb-4 flex justify-center">
+                                <StarRating rating={rating} setRating={setRating} size={32} />
+                            </div>
+
+                            <textarea
+                                className="w-full border-2 border-gray-200 dark:border-neutral-700 bg-transparent p-4 rounded-xl focus:border-[#ffde59] focus:ring-0 transition-all outline-none resize-none"
+                                rows={5}
+                                placeholder="What did you like or dislike?"
+                                value={newReview}
+                                onChange={(e) => setNewReview(e.target.value)}
+                            />
+
+                            <Motion.button
+                                whileHover={{ scale: 1.02, backgroundColor: "#e6c84f" }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleSubmitReview}
+                                className="w-full mt-4 bg-[#ffde59] text-black font-bold px-4 py-3 rounded-xl shadow-md transition-colors"
+                            >
+                                Submit Review
+                            </Motion.button>
+                        </Motion.div>
+                    </div>
+
+                    {/* Reviews List */}
+                    <div className="lg:col-span-2">
+                        <Motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6 flex items-center gap-2">
+                            Customer Reviews <span className="text-base font-normal text-gray-500">({reviews.length})</span>
+                        </Motion.h2>
+
+                        <Motion.div
+                            variants={containerVariants} // Use container variant for staggering list
+                            className="space-y-4"
+                        >
+                            <AnimatePresence>
+                                {reviews.length === 0 && (
+                                    <Motion.p variants={itemVariants} className="text-gray-500 italic p-4 bg-gray-50 dark:bg-neutral-800 rounded-xl">
+                                        No reviews yet. Be the first!
+                                    </Motion.p>
+                                )}
+
+                                {reviews.map((rev) => (
+                                    <ReviewCard key={rev._id} review={rev} />
+                                ))}
+                            </AnimatePresence>
+                        </Motion.div>
+                    </div>
+                </div>
+            </Motion.div>
         </Container >
     );
 };
+
+// --- Sub-components for cleaner JSX ---
+
+// A single row in the details grid
+const DetailItem = ({ icon: Icon, label, value }) => (
+    <Motion.div variants={itemVariants} className="flex items-start gap-3">
+        <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-lg text-yellow-600 dark:text-yellow-400">
+            <Icon className="w-5 h-5" />
+        </div>
+        <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</p>
+            <p className="font-semibold">{value}</p>
+        </div>
+    </Motion.div>
+);
+
+// A single review card
+const ReviewCard = ({ review }) => (
+    <Motion.div
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+        exit={{ opacity: 0, y: -20 }}
+        className="bg-white dark:bg-neutral-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-neutral-700 flex flex-col sm:flex-row gap-4"
+    >
+        <div className="flex-shrink-0">
+            <img src={review.userImage} alt={review.userName} className="w-12 h-12 rounded-full object-cover border-2 border-[#ffde59]" />
+        </div>
+        <div className="flex-grow">
+            <div className="flex justify-between items-start mb-2">
+                <div>
+                    <h4 className="font-bold text-lg">{review.userName}</h4>
+                    <p className="text-xs text-gray-400">
+                        {new Date(review.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                </div>
+                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-neutral-700 px-2 py-1 rounded-lg">
+                    <FaStar className="text-yellow-400 w-4 h-4" />
+                    <span className="font-bold text-sm">{review.rating}</span>
+                </div>
+            </div>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-3 hover:line-clamp-none transition-all">
+                "{review.comment}"
+            </p>
+        </div>
+    </Motion.div>
+);
+
 
 export default MealDetails;

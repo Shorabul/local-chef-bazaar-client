@@ -7,8 +7,10 @@ import { IoMenuSharp, IoClose } from "react-icons/io5";
 import useAuth from '../../../hooks/useAuth';
 import Swal from 'sweetalert2'
 import ProfileDropdown from '../../../components/ProfileDropdown';
+import Logo from '../../../components/Logo/Logo';
 
 const Navbar = () => {
+    const isDark = document.documentElement.classList.contains("dark");
     const { user, logOut } = useAuth();
     const [menutoggle, setMenuToggle] = useState(false);
     const [profileToggle, setProfileToggle] = useState(false);
@@ -22,12 +24,15 @@ const Navbar = () => {
             await logOut();
 
             Swal.fire({
-                position: "top-end",
+                position: 'top',
                 icon: "success",
-                title: "You have successfully logged out",
+                title: `You have successfully logged out`,
+                timer: 1500,
                 showConfirmButton: false,
-                timer: 1500
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
+
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -86,18 +91,7 @@ const Navbar = () => {
                 <nav className="w-full flex items-center justify-between relative py-3">
 
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2">
-                        <img
-                            width="45"
-                            height="45"
-                            src="https://i.ibb.co/WNVv4py3/Loc-Chef.png"
-                            alt="Locchef"
-                            className="rounded-full shadow-sm"
-                        />
-                        <span className="hidden md:block font-bold text-xl">
-                            Locchef
-                        </span>
-                    </Link>
+                    <Logo className='hidden md:block' />
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-7 font-medium">

@@ -93,7 +93,15 @@ const MyReview = () => {
     // Update review
     const handleUpdateSubmit = async () => {
         if (!editComment.trim() || editRating === 0) {
-            return Swal.fire("Error", "Please enter comment and rating.", "warning");
+            return Swal.fire({
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
+                icon: "warning",
+                title: "Error!",
+                text: "Please enter comment and rating.",
+                timer: 1500,
+                showConfirmButton: false,
+            });
         }
 
         try {
@@ -101,7 +109,15 @@ const MyReview = () => {
                 rating: editRating,
                 comment: editComment,
             });
-            Swal.fire("Updated!", "Your review has been updated.", "success");
+            Swal.fire({
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
+                icon: "success",
+                title: "Updated!",
+                text: "Your review has been updated.",
+                timer: 1500,
+                showConfirmButton: false,
+            });
             // Manual refresh: update review locally
             const index = reviews.findIndex((r) => r._id === editReview._id);
             if (index !== -1) {
@@ -111,7 +127,15 @@ const MyReview = () => {
             setModalOpen(false);
         } catch (error) {
             console.error(error);
-            Swal.fire("Error", "Failed to update review", "error");
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to update review.",
+                icon: "error",
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
+                iconColor: "#fb2c36",
+                confirmButtonColor: "#fb2c36",
+            });
         }
     };
     // Animation Variants
@@ -214,8 +238,9 @@ const MyReview = () => {
                                 </button>
                             </div>
                         </div>
-                        <div>
-                            <p className="mt-2">{rev.comment}</p>
+                        <div className="mt-2">
+                            <h1 className="font-semibold">{rev?.foodName}</h1>
+                            <p className="mt-1 text-sm">{rev.comment}</p>
                             <div className="flex items-center gap-1">
                                 {Array.from({ length: rev.rating }).map((_, i) => (
                                     <p key={i} className="text-yellow-400">

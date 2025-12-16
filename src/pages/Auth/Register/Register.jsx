@@ -11,9 +11,12 @@ import AnimatedInput from '../AnimatedInput';
 import Swal from 'sweetalert2';
 import { Eye, EyeOff } from 'lucide-react';
 import { usePageTitle } from '../../../hooks/usePageTitle';
+import Container from '../../../components/Shared/Container';
+import Logo from '../../../components/Logo/Logo';
 
 
 const Register = () => {
+    const isDark = document.documentElement.classList.contains("dark");
     usePageTitle("Register");
     const { registerUser, updateUserProfile, user } = useAuth();
     const navigate = useNavigate();
@@ -73,11 +76,14 @@ const Register = () => {
             await axiosSecure.post("/jwt", { email: data.email });
 
             Swal.fire({
-                position: "top-end",
+                position: 'top',
                 icon: "success",
-                title: "You have successfully Create an account",
+                title: `Hi ${data.name}`,
+                text: "You have successfully create an account",
+                timer: 1500,
                 showConfirmButton: false,
-                timer: 1500
+                background: isDark ? "#262626" : "#ffffff",
+                color: isDark ? "#ffffff" : "#262626",
             });
 
             // Navigate to home or previous route
@@ -98,176 +104,181 @@ const Register = () => {
 
 
     return (
-        <Motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="max-w-sm mx-auto min-h-screen pt-10 space-y-5"
-        >
-            {/* Header */}
+        <Container>
+            <nav className='w-full py-3'>
+                <Logo className='block' />
+            </nav>
             <Motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-2"
+                transition={{ duration: 0.4 }}
+                className="max-w-md mx-auto min-h-screen pt-10 space-y-5"
             >
-                <h1 className="font-bold text-4xl">Create an account</h1>
-                <div className="flex gap-2 text-neutral-600
+                {/* Header */}
+                <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-2"
+                >
+                    <h1 className="font-bold text-4xl">Create an account</h1>
+                    <div className="flex gap-2 text-neutral-600
             dark:text-neutral-100">
-                    <p>Already have an account?</p>
-                    <Link to="/login" className="underline">Log in</Link>
-                </div>
-            </Motion.div>
+                        <p>Already have an account?</p>
+                        <Link to="/login" className="underline">Log in</Link>
+                    </div>
+                </Motion.div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Form */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-                {/* Name */}
-                <AnimatedInput
-                    icon={LuUserRound}
-                    error={errors.name}
-                    touched={touchedFields.name}
-                >
-                    <input
-                        type="text"
-                        placeholder="Full Name"
-                        {...register("name", { required: "Name is required" })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
-                    />
-                </AnimatedInput>
-                {errors.name && <p className="text-red-600 text-xs">{errors.name.message}</p>}
-
-                {/* Photo */}
-                <AnimatedInput
-                    icon={LuUpload}
-                    error={errors.photo}
-                    touched={touchedFields.photo}
-                >
-                    <input
-                        type="file"
-                        {...register("photo", { required: "Photo is required" })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
-                    />
-                </AnimatedInput>
-                {errors.photo && <p className="text-red-600 text-xs">{errors.photo.message}</p>}
-
-                {/* Address */}
-                <AnimatedInput
-                    icon={IoLocationOutline}
-                    error={errors.address}
-                    touched={touchedFields.address}
-                >
-                    <input
-                        type="text"
-                        placeholder="Address"
-                        {...register("address", { required: "Address is required" })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
-                    />
-                </AnimatedInput>
-                {errors.address && <p className="text-red-600 text-xs">{errors.address.message}</p>}
-
-                {/* Email */}
-                <AnimatedInput
-                    icon={LuMail}
-                    error={errors.email}
-                    touched={touchedFields.email}
-                >
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        {...register("email", {
-                            required: "Email is required",
-                            pattern: {
-                                value: /^\S+@\S+\.\S+$/, // simple email regex
-                                message: "Invalid email address",
-                            },
-                        })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
-                    />
-                </AnimatedInput>
-
-                {errors.email && <p className="text-red-600 text-xs">{errors.email.message}</p>}
-
-                {/* Password */}
-                <AnimatedInput
-                    icon={LuLock}
-                    error={errors.password}
-                    touched={touchedFields.password}
-                >
-                    <input
-                        type={passShow ? 'text' : 'password'}
-                        placeholder="Password"
-                        {...register("password", {
-                            required: "Password is required",
-                            minLength: { value: 6, message: "Min 6 characters" }
-                        })}
-                        className='w-full pl-10 py-3 border rounded-lg
-                        bg-neutral-50
-                        dark:bg-neutral-700
-                        border-gray-300 dark:border-gray-500'
-                    />
-                    <span
-                        onClick={() => setPassShow(!passShow)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                    {/* Name */}
+                    <AnimatedInput
+                        icon={LuUserRound}
+                        error={errors.name}
+                        touched={touchedFields.name}
                     >
-                        {passShow ? <Eye /> : <EyeOff />}
-                    </span>
-                </AnimatedInput>
-                {errors.password && <p className="text-red-600 text-xs">{errors.password.message}</p>}
+                        <input
+                            type="text"
+                            placeholder="Full Name"
+                            {...register("name", { required: "Name is required" })}
+                            className='w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500'
+                        />
+                    </AnimatedInput>
+                    {errors.name && <p className="text-red-600 text-xs">{errors.name.message}</p>}
 
-                {/* Confirm Password */}
-                <AnimatedInput
-                    icon={LuLock}
-                    error={errors.confirmPassword}
-                    touched={touchedFields.confirmPassword}
-                >
-                    <input
-                        type={rePassShow ? 'text' : 'password'}
-                        placeholder="Confirm Password"
-                        {...register("confirmPassword", {
-                            required: "Confirm Password is required",
-                            validate: (value) =>
-                                value === password || "Passwords do not match"
-                        })}
-                        className="w-full pl-10 pr-10 py-3 border rounded-lg
+                    {/* Photo */}
+                    <AnimatedInput
+                        icon={LuUpload}
+                        error={errors.photo}
+                        touched={touchedFields.photo}
+                    >
+                        <input
+                            type="file"
+                            {...register("photo", { required: "Photo is required" })}
+                            className='w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500'
+                        />
+                    </AnimatedInput>
+                    {errors.photo && <p className="text-red-600 text-xs">{errors.photo.message}</p>}
+
+                    {/* Address */}
+                    <AnimatedInput
+                        icon={IoLocationOutline}
+                        error={errors.address}
+                        touched={touchedFields.address}
+                    >
+                        <input
+                            type="text"
+                            placeholder="Address"
+                            {...register("address", { required: "Address is required" })}
+                            className='w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500'
+                        />
+                    </AnimatedInput>
+                    {errors.address && <p className="text-red-600 text-xs">{errors.address.message}</p>}
+
+                    {/* Email */}
+                    <AnimatedInput
+                        icon={LuMail}
+                        error={errors.email}
+                        touched={touchedFields.email}
+                    >
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^\S+@\S+\.\S+$/, // simple email regex
+                                    message: "Invalid email address",
+                                },
+                            })}
+                            className='w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500'
+                        />
+                    </AnimatedInput>
+
+                    {errors.email && <p className="text-red-600 text-xs">{errors.email.message}</p>}
+
+                    {/* Password */}
+                    <AnimatedInput
+                        icon={LuLock}
+                        error={errors.password}
+                        touched={touchedFields.password}
+                    >
+                        <input
+                            type={passShow ? 'text' : 'password'}
+                            placeholder="Password"
+                            {...register("password", {
+                                required: "Password is required",
+                                minLength: { value: 6, message: "Min 6 characters" }
+                            })}
+                            className='w-full pl-10 py-3 border rounded-lg
+                        bg-neutral-50
+                        dark:bg-neutral-700
+                        border-gray-300 dark:border-gray-500'
+                        />
+                        <span
+                            onClick={() => setPassShow(!passShow)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        >
+                            {passShow ? <Eye /> : <EyeOff />}
+                        </span>
+                    </AnimatedInput>
+                    {errors.password && <p className="text-red-600 text-xs">{errors.password.message}</p>}
+
+                    {/* Confirm Password */}
+                    <AnimatedInput
+                        icon={LuLock}
+                        error={errors.confirmPassword}
+                        touched={touchedFields.confirmPassword}
+                    >
+                        <input
+                            type={rePassShow ? 'text' : 'password'}
+                            placeholder="Confirm Password"
+                            {...register("confirmPassword", {
+                                required: "Confirm Password is required",
+                                validate: (value) =>
+                                    value === password || "Passwords do not match"
+                            })}
+                            className="w-full pl-10 pr-10 py-3 border rounded-lg
                    bg-neutral-50 dark:bg-neutral-700
                    border-gray-300 dark:border-gray-500"
-                    />
-                    <span
-                        onClick={() => setRePassShow(!rePassShow)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        />
+                        <span
+                            onClick={() => setRePassShow(!rePassShow)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        >
+                            {rePassShow ? <Eye /> : <EyeOff />}
+                        </span>
+                    </AnimatedInput>
+                    {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message}</p>}
+
+
+                    {/* Submit */}
+                    <Motion.button
+                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        type="submit"
+                        disabled={loading}
+                        className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] hover:bg-yellow-400 text-black font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
                     >
-                        {rePassShow ? <Eye /> : <EyeOff />}
-                    </span>
-                </AnimatedInput>
-                {errors.confirmPassword && <p className="text-red-600 text-xs">{errors.confirmPassword.message}</p>}
-
-
-                {/* Submit */}
-                <Motion.button
-                    whileTap={{ scale: 0.95 }}
-                    whileHover={{ scale: 1.02 }}
-                    type="submit"
-                    disabled={loading}
-                    className={`w-full flex justify-center items-center gap-2 py-3 rounded-lg bg-[#ffde59] hover:bg-yellow-400 text-black font-semibold transition cursor-pointer ${loading ? "opacity-60" : ""}`}
-                >
-                    Create an account
-                    <LuChevronRight />
-                </Motion.button>
-            </form>
-        </Motion.div>
+                        Create an account
+                        <LuChevronRight />
+                    </Motion.button>
+                </form>
+            </Motion.div>
+        </Container>
     );
 };
 
