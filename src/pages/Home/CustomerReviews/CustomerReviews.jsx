@@ -141,7 +141,7 @@ const CustomerReviews = () => {
                 <AutoScrollRow reviews={reviews} direction="left" />
 
                 {/* Bottom row: right → left */}
-                <AutoScrollRow reviews={reviews} direction="right" />
+                <AutoScrollRow reviews={reviews} direction="left" />
             </section>
         </Container>
     );

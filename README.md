@@ -10,7 +10,7 @@ This project is designed to demonstrate real-world application development skill
 
 ## Live URL
 
-🔗 **Url:** <YOUR_LIVE_CLIENT_URL>
+🔗 **Url:** [https://locchef.netlify.app/](https://locchef.netlify.app/)
 
 ---
 
@@ -89,5 +89,6 @@ This project is designed to demonstrate real-world application development skill
 * JWT Authentication
 * Stripe Payment API
 * CORS
+
 
 🎉 **Thank you for reviewing Locchef!**
